@@ -19,7 +19,7 @@ uint32_t mailbox_read(uint32_t channel) {
     channel &= MAILBOX_CHAN_MASK;
 
     while(TRUE) {
-        while(0 != (mmio_read(MAILBOX_STATUS) & (1 << 29))) { ; }
+        while(0 != (mmio_read(MAILBOX_STATUS) & (1 << 30))) { ; }
 
         uint32_t message = mmio_read(MAILBOX_READ);
         uint32_t data = message & MAILBOX_DATA_MASK;
