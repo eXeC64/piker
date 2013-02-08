@@ -9,7 +9,7 @@ void mailbox_send(uint32_t data, uint32_t channel) {
     while(0 != (mmio_read(MAILBOX_STATUS) & (1 << 31))) { ; }
 
     uint32_t message = 0;
-    message |= data & MAILBOX_DATA_MASK;
+    message |= (data << 4) & MAILBOX_DATA_MASK;
     message |= channel & MAILBOX_CHAN_MASK;
 
     mmio_write(MAILBOX_WRITE, message);
@@ -26,7 +26,7 @@ uint32_t mailbox_read(uint32_t channel) {
         uint32_t chan = message & MAILBOX_CHAN_MASK;
 
         if(chan == channel) {
-            return data;
+            return data >> 4;
         }
     }
 }
