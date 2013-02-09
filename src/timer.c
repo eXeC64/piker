@@ -11,6 +11,6 @@ uint64_t timer_now() {
 
 void timer_sleep(uint64_t duration_ms) {
     uint64_t end = timer_now(NULL) + duration_ms * 1000;
-    while(timer_now(NULL) < end) { ; }
+    while(timer_now() < end) { ; }
 }
 
