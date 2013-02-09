@@ -56,22 +56,27 @@ void uart_printf(const uint8_t *format, ...) {
                     c++;
                     break;
                 case 'i':
-                    int_to_str( va_arg(args, int64_t), 10, buf);
+                    int_to_str( va_arg(args, uint32_t), 10, buf);
+                    uart_puts(buf);
+                    c++;
+                    break;
+                case 'n':
+                    int_to_str( va_arg(args, int32_t), 10, buf);
                     uart_puts(buf);
                     c++;
                     break;
                 case 'x':
-                    int_to_str( va_arg(args, int64_t), 16, buf);
+                    int_to_str( va_arg(args, uint32_t), 16, buf);
                     uart_puts(buf);
                     c++;
                     break;
                 case 'b':
-                    int_to_str( va_arg(args, int64_t), 2, buf);
+                    int_to_str( va_arg(args, uint32_t), 2, buf);
                     uart_puts(buf);
                     c++;
                     break;
                 case 'c':
-                    uart_putc(va_arg(args, uint64_t));
+                    uart_putc(va_arg(args, uint32_t));
                     c++;
                     break;
             }

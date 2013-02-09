@@ -25,7 +25,7 @@ dist-clean: clean
 	$(RM) -f *.d
  
 %.o: %.c
-	$(ARMGNU)-gcc -Wall -Werror --std=c99 -c $< -I include -o $@
+	$(ARMGNU)-gcc -Wall -Werror -Wno-pointer-sign --std=c99 -c $< -I include -o $@
  
 %.o: %.s
 	$(ARMGNU)-as $< -o $@
