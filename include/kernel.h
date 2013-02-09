@@ -18,8 +18,8 @@
 /* Global macros */
 #define STR(x) (const uint8_t*)(x)
 /* Conversion between physical and bus addresses */
-#define PHYS_TO_BUS(x) ((0x00FFFFFF & x) | 0x7E000000)
-#define BUS_TO_PHYS(x) ((0x00FFFFFF & x) | 0x20000000)
+#define PHYS_TO_BUS(x) (void*)((uint32_t)(x) + 0xC0000000)
+#define BUS_TO_PHYS(x) (void*)((uint32_t)(x) - 0xC0000000)
 
 /* Address Table */
 enum {
