@@ -8,7 +8,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
     uart_puts(STR("Piker 0.0.0\n"));
 
     while(TRUE) {
-        uart_printf(STR("time: %ims\n"), timer_now() / 1000);
+        uart_printf("time: %ims\n", (uint32_t)(timer_now() / 1000));
         timer_sleep(1000);
     }
 
