@@ -1,4 +1,7 @@
-ARMGNU ?= /opt/arm-2008q3/bin/arm-none-eabi
+PREFIX ?= /opt/arm-2008q3
+ARMGNU ?= $(PREFIX)/bin/arm-none-eabi
+
+CFLAGS ?= -Wall -Werror -Wno-pointer-sign --std=c99
 
 # source files
 SOURCES_ASM := $(shell find src/ -type f -name '*.s')
@@ -13,7 +16,7 @@ all: kernel.img
 include $(wildcard *.d)
 
 kernel.elf: $(OBJS) linker.ld
-	$(ARMGNU)-ld $(OBJS) /opt/arm-2008q3/lib/gcc/arm-none-eabi/4.3.2/libgcc.a -T linker.ld -o $@
+	$(ARMGNU)-ld $(OBJS) $(PREFIX)/lib/gcc/arm-none-eabi/4.3.2/libgcc.a -T linker.ld -o $@
 
 kernel.img: kernel.elf
 	$(ARMGNU)-objcopy kernel.elf -O binary kernel.img
@@ -25,7 +28,7 @@ dist-clean: clean
 	$(RM) -f *.d
  
 %.o: %.c
-	$(ARMGNU)-gcc -Wall -Werror -Wno-pointer-sign --std=c99 -c $< -I include -o $@
+	$(ARMGNU)-gcc $(CFLAGS) -c $< -I include -o $@
  
 %.o: %.s
 	$(ARMGNU)-as $< -o $@
