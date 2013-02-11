@@ -23,11 +23,9 @@
 
 /* Address Table */
 enum {
-    GPIO_BASE       = 0x00200000,
-    GPPUD           = (GPIO_BASE + 0x94),
-    GPPUDCLK0       = (GPIO_BASE + 0x98),
+    IO_BASE         = 0x20000000,
  
-    SYS_TIMER_BASE  = 0x20003000,
+    SYS_TIMER_BASE  = (IO_BASE + 0x00003000),
     SYS_TIMER_CS    = (SYS_TIMER_BASE + 0x00),
     SYS_TIMER_CLO   = (SYS_TIMER_BASE + 0x04),
     SYS_TIMER_CHI   = (SYS_TIMER_BASE + 0x08),
@@ -36,7 +34,7 @@ enum {
     SYS_TIMER_C2    = (SYS_TIMER_BASE + 0x14),
     SYS_TIMER_C3    = (SYS_TIMER_BASE + 0x18),
 
-    MAILBOX_BASE    = 0x2000B880,
+    MAILBOX_BASE    = (IO_BASE + 0x0000B880),
     MAILBOX_READ    = (MAILBOX_BASE + 0x00),
     MAILBOX_PEAK    = (MAILBOX_BASE + 0x10),
     MAILBOX_SENDER  = (MAILBOX_BASE + 0x14),
@@ -44,7 +42,11 @@ enum {
     MAILBOX_CONFIG  = (MAILBOX_BASE + 0x1C),
     MAILBOX_WRITE   = (MAILBOX_BASE + 0x20),
 
-    UART0_BASE      = 0x20201000,
+    GPIO_BASE       = (IO_BASE + 0x00200000),
+    GPPUD           = (GPIO_BASE + 0x94),
+    GPPUDCLK0       = (GPIO_BASE + 0x98),
+
+    UART0_BASE      = (IO_BASE + 0x00201000),
     UART0_DR        = (UART0_BASE + 0x00),
     UART0_RSRECR    = (UART0_BASE + 0x04),
     UART0_FR        = (UART0_BASE + 0x18),
