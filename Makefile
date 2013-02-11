@@ -1,8 +1,8 @@
 ARMGNU ?= /opt/arm-2008q3/bin/arm-none-eabi
 
 # source files
-SOURCES_ASM := $(wildcard src/*.s)
-SOURCES_C   := $(wildcard src/*.c)
+SOURCES_ASM := $(shell find src/ -type f -name '*.s')
+SOURCES_C   := $(shell find src/ -type f -name '*.c')
  
 # object files
 OBJS        := $(patsubst %.s,%.o,$(SOURCES_ASM))
