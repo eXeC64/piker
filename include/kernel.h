@@ -8,7 +8,7 @@
 #include <stdarg.h>
 
 /* Commonly used headers */
-#include "mmio.h"
+#include "mem/mmio.h"
 
 /* Global constants */
 #define NULL 0

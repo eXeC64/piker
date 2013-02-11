@@ -1,6 +1,6 @@
 #include "kernel.h"
 
-#include "mmio.h"
+#include "mem/mmio.h"
 
 void inline mmio_write(uint32_t address, uint32_t val) {
     *((uint32_t*)address) = val;
