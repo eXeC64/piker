@@ -16,9 +16,13 @@ void frame_init() {
         frames_bitmap[i] = 0x00000000;
     }
 
-    /* Now lets mark the kernel's currently used frames as taken */
-    for(uint32_t i = _start; i < _end; i += 0x1000) {
-        frame_set(i / 4096, 1);
+    /* Now lets mark the kernel's frames as taken */
+
+    uint32_t kstart = (uint32_t)(&_start) - 0xC0000000;
+    uint32_t kend   = (uint32_t)(&_end)   - 0xC0000000;
+
+    for(uint32_t i = kstart; i < kend; i += 0x1000) {
+        frame_set(i / 0x1000, 1);
     }
 }
 
@@ -51,8 +55,8 @@ void frame_set(uint32_t frame, uint8_t status) {
 
     uint32_t bits = frames_bitmap[frame / 32];
 
-    bits &= ~(1 << (frame & 32));
-    bits |= (status << (frame & 32));
+    bits &= ~(1 << (frame % 32));
+    bits |= (status << (frame % 32));
 
     frames_bitmap[frame / 32] = bits;
 }
