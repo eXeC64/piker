@@ -16,6 +16,10 @@
 #define TRUE 1
 #define FALSE 0
 
+/* Linker tags */
+extern uint32_t _start;
+extern uint32_t _end;
+
 /* Address Table */
 enum {
     IO_BASE         = 0xF2000000,
