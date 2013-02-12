@@ -24,7 +24,7 @@
 
 /* Address Table */
 enum {
-    IO_BASE         = 0x20000000,
+    IO_BASE         = 0xF2000000,
  
     SYS_TIMER_BASE  = (IO_BASE + 0x00003000),
     SYS_TIMER_CS    = (SYS_TIMER_BASE + 0x00),
