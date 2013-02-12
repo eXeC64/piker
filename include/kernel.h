@@ -16,12 +16,6 @@
 #define TRUE 1
 #define FALSE 0
 
-/* Global macros */
-#define STR(x) (const uint8_t*)(x)
-/* Conversion between physical and bus addresses */
-#define PHYS_TO_BUS(x) (void*)((uint32_t)(x) + 0xC0000000)
-#define BUS_TO_PHYS(x) (void*)((uint32_t)(x) - 0xC0000000)
-
 /* Address Table */
 enum {
     IO_BASE         = 0xF2000000,
