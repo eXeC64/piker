@@ -12,8 +12,8 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
 
     frame_init();
 
-    for(uint32_t i = 0; i < 64; ++i) {
-        uart_printf("frame: %i = %i\n", i, frame_get(i));
+    for(uint32_t i = 0x00000; i < 0x20000; i += 0x1000) {
+        uart_printf("frame: 0x%x = %i\n", i, frame_get(i));
     }
 
     uart_printf("kernel_main address: 0x%x\n", (uint32_t)kernel_main);

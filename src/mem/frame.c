@@ -22,12 +22,15 @@ void frame_init() {
     uint32_t kend   = (uint32_t)(&_end)   - 0xC0000000;
 
     for(uint32_t i = kstart; i < kend; i += 0x1000) {
-        frame_set(i / 0x1000, 1);
+        frame_set(i, 1);
     }
 }
 
 uint8_t frame_get(uint32_t frame) {
-    /* call non-existant frames occupied */
+
+    /* convert from physical address to frame index */
+    frame /= 0x1000;
+
     if(frame > 131071) {
         return 1;
     }
@@ -44,6 +47,9 @@ uint8_t frame_get(uint32_t frame) {
 }
 
 void frame_set(uint32_t frame, uint8_t status) {
+    /* convert from physical address to frame index */
+    frame /= 0x1000;
+
     /* cant set a non-existant frame */
     if(frame > 131071) {
         return;
@@ -69,7 +75,7 @@ uint8_t frame_alloc(uint32_t* frame) {
             for(uint32_t f = i * 32; f < (i+1) * 32; ++f) {
                 if(0 == frame_get(f)) {
                     frame_set(f, 1);
-                    *frame = f;
+                    *frame = f * 0x1000; /* give frame address */
                     return 1;
                 }
             }
@@ -79,6 +85,9 @@ uint8_t frame_alloc(uint32_t* frame) {
 }
 
 void frame_free(uint32_t frame) {
+    /* convert from physical address to frame index */
+    frame /= 0x1000;
+
     if( frame > 131071) {
         return;
     }
