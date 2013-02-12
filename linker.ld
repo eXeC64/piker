@@ -24,6 +24,9 @@ SECTIONS {
     _data_start = .;
     .data :
     {
+        KEEP(*(.data.pagetable))
+
+        . = ALIGN(4096);
         *(.data)
     }
     . = ALIGN(4096);
