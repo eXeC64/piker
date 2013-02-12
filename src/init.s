@@ -3,6 +3,34 @@
 .global start
 start:
 
+    #First enable paging
+
+    #Write the pagetable addresses
+    ldr r4, =kernel_pagetable
+    mcr p15, 0, r4, c2, c0, 0
+    ldr r4, =kernel_pagetable
+    mcr p15, 0, r4, c2, c0, 1
+
+    #Set the boundary to 0, all 4GB is paged by TTBR0
+    ldr r4, =0
+    mcr p15, 0, r4, c2, c0, 2
+        
+    #Set domain permissions
+    ldr r4, =0x55555555
+    mcr p15, 0, r4, c3, c0, 0
+
+    #Enable paging
+    ldr r5, =0xCF7FCBF8
+    ldr r6, =0x00801807
+    mrc p15, 0, r4, c1, c0, 0
+    and r4, r4, r5
+    orr r4, r4, r6
+    mcr p15, 0, r4, c1, c0, 0
+
+    #We're now paged using virtual memory.
+    #But it's an identity map for now so
+    #continue as usual.
+
     mov sp,#0x8000
 
     ldr r4,=_bss_start
