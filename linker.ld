@@ -2,7 +2,7 @@ ENTRY(start)
 
 SECTIONS {
 
-    . = 0x8000;
+    . = 0xC0008000;
     _start = .;
     _text_start = .;
     .text :

@@ -6,9 +6,9 @@ start:
     #First enable paging
 
     #Write the pagetable addresses
-    ldr r4, =kernel_pagetable
+    ldr r4, =kernel_pagetable - 0xC0000000
     mcr p15, 0, r4, c2, c0, 0
-    ldr r4, =kernel_pagetable
+    ldr r4, =kernel_pagetable - 0xC0000000
     mcr p15, 0, r4, c2, c0, 1
 
     #Set the boundary to 0, all 4GB is paged by TTBR0
@@ -28,10 +28,12 @@ start:
     mcr p15, 0, r4, c1, c0, 0
 
     #We're now paged using virtual memory.
-    #But it's an identity map for now so
-    #continue as usual.
+    #Lets move to higher memory
+    ldr pc, =high_addr
 
-    mov sp,#0x8000
+high_addr:
+
+    ldr sp, =0xC0008000
 
     ldr r4,=_bss_start
     ldr r9,=_bss_end
