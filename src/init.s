@@ -1,6 +1,6 @@
 .section ".text.boot"
 
-.globl start
+.global start
 start:
 
     mov sp,#0x8000
