@@ -41,9 +41,47 @@ high_addr:
     ldr r4, =0x00000000
     mcr p15, 0, r4, c8, c7, 0
 
-    #Initialise the stack
-    ldr sp, =0xC0008000
+    #Initialise the stacks
 
+    #Get program status, clear mode bits
+    mrs r4, cpsr
+    bic r4, r4, #0x1f
+
+    #fiq
+    orr r5, r4, #0x11
+    msr cpsr_c, r5
+    ldr sp, =fiq_stack_top
+
+    #irq
+    orr r5, r4, #0x12
+    msr cpsr_c, r5
+    ldr sp, =irq_stack_top
+
+    #supervisor
+    orr r5, r4, #0x13
+    msr cpsr_c, r5
+    ldr sp, =supervisor_stack_top
+
+    #abort
+    orr r5, r4, #0x17
+    msr cpsr_c, r5
+    ldr sp, =abort_stack_top
+
+    #undefined
+    orr r5, r4, #0x1B
+    msr cpsr_c, r5
+    ldr sp, =undefined_stack_top
+
+    #user and system share a stack
+    orr r5, r4, #0x1f
+    msr cpsr_c, r5
+    ldr sp, =user_stack_top
+
+    #return to supervisor mode
+    orr r5, r4, #0x13
+    msr cpsr_c, r5
+
+    #Initialise bss to 0
     ldr r4,=_bss_start
     ldr r9,=_bss_end
     mov r5,#0
@@ -63,6 +101,45 @@ high_addr:
 halt:
     wfe
     b halt
+
+.section ".bss"
+
+.balign 4096
+.global fiq_stack
+fiq_stack:
+    .skip 16384
+fiq_stack_top:
+
+.balign 4096
+.global irq_stack
+irq_stack:
+    .skip 16384
+irq_stack_top:
+
+.balign 4096
+.global supervisor_stack
+supervisor_stack:
+    .skip 16384
+supervisor_stack_top:
+
+.balign 4096
+.global abort_stack
+abort_stack:
+    .skip 16384
+abort_stack_top:
+
+.balign 4096
+.global undefined_stack
+undefined_stack:
+    .skip 16384
+undefined_stack_top:
+
+.balign 4096
+.global user_stack
+user_stack:
+    .skip 16384
+user_stack_top:
+
 
 .section ".data.pagetable"
 

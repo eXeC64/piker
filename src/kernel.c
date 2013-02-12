@@ -12,7 +12,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
 
     frame_init();
 
-    for(uint32_t i = 0x00000; i < 0x20000; i += 0x1000) {
+    for(uint32_t i = 0x00000; i < 0x32000; i += 0x1000) {
         uart_printf("frame: 0x%x = %i\n", i, frame_get(i));
     }
 
