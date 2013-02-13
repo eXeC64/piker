@@ -67,31 +67,35 @@ void frame_set(uint32_t frame, uint8_t status) {
     frames_bitmap[frame / 32] = bits;
 }
 
-uint8_t frame_alloc(uint32_t* frame) {
+uint32_t frame_alloc(uint32_t* frame, uint32_t num) {
+    uint32_t allocated = 0;
+
+    /* Iterate over all the frames */
     for(uint32_t i = 0; i < 4096; ++i) {
         if(frames_bitmap[i] ^ 0xFFFFFFFF) {
             /* There's a free frame here */
 
-            for(uint32_t f = i * 32; f < (i+1) * 32; ++f) {
+            /* For each bit in this part of the bitmap */
+            for(uint32_t f = i * 32 * 0x1000; f < (i+1) * 32 * 0x1000; f += 0x1000) {
+
+                /* If the frame is free */
                 if(0 == frame_get(f)) {
                     frame_set(f, 1);
-                    *frame = f * 0x1000; /* give frame address */
-                    return 1;
+                    frame[allocated++] = f;
+
+                    /* Check if we've finished allocating frames */
+                    if(allocated == num) {
+                        return allocated;
+                    }
                 }
             }
         }
     }
-    return 0;
+    /* Ran out of frames to allocate, just return how many were allocated */
+    return allocated;
 }
 
 void frame_free(uint32_t frame) {
-    /* convert from physical address to frame index */
-    frame /= 0x1000;
-
-    if( frame > 131071) {
-        return;
-    }
-
     frame_set(frame, 0);
 }
 
