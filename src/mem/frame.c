@@ -17,11 +17,23 @@ void frame_init() {
     }
 
     /* Now lets mark the kernel's frames as taken */
-
     uint32_t kstart = (uint32_t)(&_start) - 0xC0000000;
     uint32_t kend   = (uint32_t)(&_end)   - 0xC0000000;
 
     for(uint32_t i = kstart; i < kend; i += 0x1000) {
+        frame_set(i, 1);
+    }
+
+    /* We also need to mark the GPU's frames as taken */
+    /* For now we're assuming we have 512MB of memory
+     * and 64 MB of it is allocated to the GPU */
+
+    /* 64 MB */
+    uint32_t gpu_size = 0x04000000;
+    uint32_t gpu_end =  0x20000000;
+    uint32_t gpu_start =  gpu_end - gpu_size;
+
+    for(uint32_t i = gpu_start; i < gpu_end; i += 0x1000) {
         frame_set(i, 1);
     }
 }
