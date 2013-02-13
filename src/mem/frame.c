@@ -67,9 +67,7 @@ void frame_set(uint32_t frame, uint8_t status) {
     frames_bitmap[frame / 32] = bits;
 }
 
-uint32_t frame_alloc(uint32_t* frame, uint32_t num) {
-    uint32_t allocated = 0;
-
+uint32_t frame_alloc(uint32_t* frame) {
     /* Iterate over all the frames */
     for(uint32_t i = 0; i < 4096; ++i) {
         if(frames_bitmap[i] ^ 0xFFFFFFFF) {
@@ -81,18 +79,62 @@ uint32_t frame_alloc(uint32_t* frame, uint32_t num) {
                 /* If the frame is free */
                 if(0 == frame_get(f)) {
                     frame_set(f, 1);
-                    frame[allocated++] = f;
+                    *frame = f;
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
-                    /* Check if we've finished allocating frames */
-                    if(allocated == num) {
-                        return allocated;
+uint32_t frame_alloc_mult(uint32_t* frames, uint32_t num) {
+    for(uint32_t i = 0; i < num; ++i) {
+        uint32_t result = frame_alloc(&(frames[i]));
+        if(result == 0) {
+            /* Allocation failed, we're out of frames */
+            return i;
+        }
+    }
+
+    return num;
+}
+uint32_t frame_alloc_mult_contig(uint32_t* frames, uint32_t num) {
+
+    /* Iterate over all the frames */
+    for(uint32_t i = 0; i < 4096; ++i) {
+        if(frames_bitmap[i] ^ 0xFFFFFFFF) {
+            /* There's a free frame here */
+
+            /* Find the first free frame */
+            for(uint32_t f = i * 32 * 0x1000; f < (i+1) * 32 * 0x1000; f += 0x1000) {
+                if(frame_get(f) == 0) {
+
+                    /* Count how many contiguous free frames there are
+                     * up to the amount we're looking for.
+                     */
+                    uint32_t ff;
+                    for(ff = 1; ff < num; ++ff) {
+                        if(frame_get(f + (ff * 0x1000)) == 1) {
+                            break;
+                        }
+                    }
+
+                    /* If there are enough frames, allocate them and
+                     * then return. If not, continue.
+                     */
+                    if(ff == num) {
+                        for(uint32_t af = f; af < f + (num * 0x1000); af += 0x1000) {
+                            frame_set(af, 1);
+                        }
+                        return num;
                     }
                 }
             }
         }
     }
-    /* Ran out of frames to allocate, just return how many were allocated */
-    return allocated;
+
+    return 0;
 }
 
 void frame_free(uint32_t frame) {

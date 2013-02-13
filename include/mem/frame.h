@@ -26,7 +26,9 @@ void frame_init();
 uint8_t frame_get(uint32_t frame);
 void frame_set(uint32_t frame, uint8_t status);
 
-uint32_t frame_alloc(uint32_t* frames, uint32_t num);
+uint32_t frame_alloc(uint32_t* frame);
+uint32_t frame_alloc_mult(uint32_t* frames, uint32_t num);
+uint32_t frame_alloc_mult_contig(uint32_t* frames, uint32_t num);
 void frame_free(uint32_t frame);
 
 #endif /*FRAME_H*/
