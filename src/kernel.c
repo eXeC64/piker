@@ -16,15 +16,18 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
     uart_printf("kernel_main address: 0x%x\n", (uint32_t)kernel_main);
     uart_printf("kernel_main val: 0x%x\n", mmio_read((uint32_t)kernel_main));
 
-    uint32_t my_frames[16];
+    uart_printf("Allocating 256 bytes of memory\n");
+    uint32_t ptr = mem_alloc(256);
+    uart_printf("mem: 0x%x\n", ptr);
 
-    if(frame_alloc_mult(my_frames, 16)) {
-        uart_printf("allocated frames:\n", my_frames);
+    uart_printf("Allocating another 512 bytes of memory\n");
+    uint32_t ptr2 = mem_alloc(512);
+    uart_printf("mem: 0x%x\n", ptr2);
 
-        for(uint8_t i = 0; i < 16; ++i) {
-            uart_printf("%i: 0x%x\n", i, my_frames[i]);
-        }
-    }
+    uart_printf("Allocating another 256 bytes of memory\n");
+    uint32_t ptr3 = mem_alloc(256);
+    uart_printf("mem: 0x%x\n", ptr3);
+
 
     while(TRUE) {
         uart_printf("time: %ims\n", (uint32_t)(timer_now() / 1000));

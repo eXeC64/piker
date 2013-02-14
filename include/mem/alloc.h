@@ -5,7 +5,7 @@
 
 void alloc_init();
 
-void* mem_alloc(uint32_t size);
-void mem_free(void* address, uint32_t size);
+uint32_t mem_alloc(uint32_t size);
+void mem_free(uint32_t address, uint32_t size);
 
 #endif /*MEM_ALLOC_H*/

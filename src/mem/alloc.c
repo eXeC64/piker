@@ -51,7 +51,7 @@ void alloc_init() {
     }
 
     /* We'll start with 1 frame by default */
-    if( 0 == frame_alloc(&(base_table.frames[0])) ) {
+    if( 0 == frame_alloc(base_table.frames) ) {
         return; /* If this failed we're screwed. */
     }
 
@@ -65,7 +65,7 @@ void alloc_init() {
     base_table.first_node->next = NULL;
 }
 
-void* mem_alloc(uint32_t size) {
+uint32_t mem_alloc(uint32_t size) {
 
     if(base_table.first_node == NULL && base_table.next == NULL) {
         /* No free space left. TODO allocate more space */
@@ -76,6 +76,7 @@ void* mem_alloc(uint32_t size) {
     uint32_t best_size = base_table.first_node->size;
     alloc_node_t* best_node = base_table.first_node;
 
+    alloc_node_t* prev = NULL;
     alloc_node_t* cur = base_table.first_node;
     alloc_node_t* next = (alloc_node_t*) cur->next;
 
@@ -84,27 +85,63 @@ void* mem_alloc(uint32_t size) {
        or have run out of nodes to scan
     */
 
-    while(cur != NULL && best_size != size) {
+    while(best_size != size) {
         if(cur->size < best_size && cur->size >= size) {
             /* New best fit */
             best_size = cur->size;
             best_node = cur;
         }
-        /* Move onto the next node */
+        /* Move onto the next node if valid*/
+        if(next != NULL) {
+        prev = cur;
         cur = next;
+        } else {
+            break;
+        }
     }
-
-    /* We've now got our best match so far */
 
     if(best_size == size) {
-        /* Fits perfectly */
+        /* Fits perfectly, this node simply gets removed */
+
+        /* If this is the first node, point first node to next node */
+        if(base_table.first_node == cur) {
+            base_table.first_node = (alloc_node_t*) cur->next;
+        } else {
+            /* Point previous node to next node */
+            if(prev != NULL) {
+                prev->next = (struct alloc_node_t*) next;
+            }
+        }
+
+        /* Zero out this node and return the pointer */
+        uint32_t pointer = cur->start;
+
+        cur->start = 0;
+        cur->size = 0;
+        cur->next = NULL;
+
+        return pointer;
+
     } else {
-        /* We need to split this node */
+        /* We need to shrink this node
+         * It is fairly easy, we just
+         * move the start of this node
+         * forwards and decrease the size.
+         */
+
+
+        uint32_t pointer = (cur->start);
+
+        cur->start += size;
+        cur->size -= size;
+
+        return pointer;
     }
 
+    /* Execution should never reach here. */
     return NULL;
 }
 
-void mem_free(void* address, uint32_t size) {
+void mem_free(uint32_t address, uint32_t size) {
 
 }
