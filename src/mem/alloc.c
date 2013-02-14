@@ -26,8 +26,8 @@ typedef struct {
 /* 4096 bytes exactly - 1 frame */
 typedef struct {
     uint32_t num_frames; /* number of frames used */
-    struct alloc_node_t* first_node; /* first usable node */
-    struct alloc_table_t* next; /* next allocation table */
+    alloc_node_t* first_node; /* first usable node */
+    struct alloc_table_t * next; /* next allocation table */
     uint32_t frames[16]; /* array of frames used */
     alloc_node_t nodes[335]; /* array of nodes in the linked list */
 } alloc_table_t;
@@ -57,7 +57,7 @@ void alloc_init() {
 
     base_table.num_frames = 1;
 
-    base_table.first_node = (alloc_node_t*)&(base_table.nodes[0]);
+    base_table.first_node = (alloc_node_t*) &(base_table.nodes[0]);
 
     /* start address of free space as a virt address */
     base_table.first_node->start = base_table.frames[0] + 0xC0000000;
@@ -77,7 +77,7 @@ void* mem_alloc(uint32_t size) {
     alloc_node_t* best_node = base_table.first_node;
 
     alloc_node_t* cur = base_table.first_node;
-    alloc_node_t* next = cur->next;
+    alloc_node_t* next = (alloc_node_t*) cur->next;
 
     /*
        Wait until we've either found a perfect fit
