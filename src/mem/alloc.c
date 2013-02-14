@@ -93,8 +93,8 @@ uint32_t mem_alloc(uint32_t size) {
         }
         /* Move onto the next node if valid*/
         if(next != NULL) {
-        prev = cur;
-        cur = next;
+            prev = cur;
+            cur = next;
         } else {
             break;
         }
@@ -142,6 +142,93 @@ uint32_t mem_alloc(uint32_t size) {
     return NULL;
 }
 
-void mem_free(uint32_t address, uint32_t size) {
+void mem_free(uint32_t addr, uint32_t size) {
+
+    /* Walk through the linked list.
+     * If a node is either infront of or behind
+     * the allocation we expand into the now free
+     * space. We then attempt to merge, as long
+     * as we're not merging across a frame
+     * boundary (0x1000).
+     */
+
+    if(base_table.first_node == NULL) {
+        /* Nothing to walk. We're screwed. */
+        return;
+    }
+
+    alloc_node_t* prev = NULL;
+    alloc_node_t* cur = base_table.first_node;
+    alloc_node_t* next = (alloc_node_t*) cur->next;
+
+    while(TRUE) {
+        /* Check infront of current node */
+        if(cur->start > addr && cur->start - size == addr) {
+            /* We're just after the freed memory.
+             * Let's expand into it.
+             */
+            cur->start = addr;
+            cur->size += size;
+
+            /* Now let's check if we can merge. */
+            if(prev != NULL) {
+                if(prev->start + prev->size == cur->start) {
+                    /* We're adjacent. Now, as long as we're
+                     * not a frame boundary we can merge.
+                     */
+                    if(cur->start & 0xFFF) {
+                        prev->size += cur->size;
+                        prev->next = cur->next;
+
+                        cur->size = 0;
+                        cur->start = 0;
+                        cur->next = NULL;
+                    }
+                }
+            }
+
+            /* Freed, time to leave */
+            return;
+        }
+
+        if(cur->start < addr && cur->start + cur->size == addr) {
+            /* We're just before the freed memory.
+             * Let's expand into i.
+             */
+            cur->size += size;
+
+            /* Now let's check if we can merge. */
+            if(next != NULL) {
+                if(cur->start + cur->size == next->start) {
+                    /* We're adjacent. Now, as long as we're
+                     * not a frame boundary we can merge.
+                     */
+                    if(next->start & 0xFFF) {
+                        cur->size += next->size;
+                        cur->next = next->next;
+
+                        next->size = 0;
+                        next->start = 0;
+                        next->next = NULL;
+                    }
+                }
+            }
+            /* Freed, time to leave */
+            return;
+        }
+
+        /* Move onto the next node if valid*/
+        if(next != NULL) {
+            prev = cur;
+            cur = next;
+        } else {
+            break;
+        }
+    }
+
+    /* If execution reaches here then we've got no
+     * nodes adjacent to the freed memory. Let's just
+     * create a new node and insert it.
+     */
 
 }
