@@ -11,6 +11,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
     uart_puts("Setting up frames\n");
 
     frame_init();
+    alloc_init();
 
     uart_printf("kernel_main address: 0x%x\n", (uint32_t)kernel_main);
     uart_printf("kernel_main val: 0x%x\n", mmio_read((uint32_t)kernel_main));
