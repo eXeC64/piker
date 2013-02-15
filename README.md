@@ -46,9 +46,8 @@ The core principle is that everything is a file or file system, and that is the 
     --------------------- USERSPACE
 
     --------------------- KERNELSPACE
-    0x40000000-0x7FFFFFFF paged for kernel's heap
-    0x80000000-0xBFFFFFFF unmapped
-    0xC0000000-0xDFFFFFFF raw memory mapping - kernel lives in here
+    0x40000000-0xBFFFFFFF unmapped
+    0xC0000000-0xDFFFFFFF raw memory mapping
     0xE0000000-0xF1FFFFFF unmapped
     0xF2000000-0xF2FFFFFF raw peripheral mapping
     0xF3000000-0xFFFFFFFF unmapped
