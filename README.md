@@ -36,6 +36,12 @@ Harry.
 The design philosophy is based off of unix, and some of plan9.
 The core principle is that everything is a file or file system, and that is the universal interface.
 
+###Notes
+* Applications/software are packages
+* Security
+    * Single user system, but have permissions defined per package
+    * Packages can only read/write their own data
+    * Packages can only access devices if given permission
 
 ###Memory Map
 
