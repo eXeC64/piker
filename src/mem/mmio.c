@@ -10,6 +10,9 @@ void inline mem_flush_cache() {
             "mcr p15, 0, r3, c7, c14, 0;"
             "mcr p15, 0, r3, c7, c10, 4;"
             "mcr p15, 0, r3, c7, c10, 5;"
+            : /* no outputs */
+            : /* no inputs */
+            : "r3" /* we clobbered r3 */
            );
 }
 
@@ -20,6 +23,9 @@ void inline mem_barrier() {
             "mcr p15, 0, r3, c7, c5, 6;"
             "mcr p15, 0, r3, c7, c10, 4;"
             "mcr p15, 0, r3, c7, c5, 4;"
+            : /* no outputs */
+            : /* no inputs */
+            : "r3" /* we clobbered r3 */
            );
 }
 
