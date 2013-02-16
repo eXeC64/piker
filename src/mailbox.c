@@ -8,7 +8,10 @@
 uint32_t mailbox_buffer[256] __attribute__((aligned (16)));
 
 void mailbox_send(uint32_t data, uint32_t channel) {
-    while(0 != (mmio_read(MAILBOX_0_STATUS) & (1 << 31))) { ; }
+    mem_barrier();
+    mem_flush_cache();
+
+    while(0 != (mmio_read(MAILBOX_0_STATUS) & (1 << 31))) { mem_flush_cache(); }
 
     uint32_t message = 0;
     message |= data & MAILBOX_DATA_MASK;
@@ -18,10 +21,12 @@ void mailbox_send(uint32_t data, uint32_t channel) {
 }
 
 uint32_t mailbox_read(uint32_t channel) {
+    mem_barrier();
     channel &= MAILBOX_CHAN_MASK;
 
     while(TRUE) {
-        while(0 != (mmio_read(MAILBOX_0_STATUS) & (1 << 30))) { ; }
+        mem_flush_cache();
+        while(0 != (mmio_read(MAILBOX_0_STATUS) & (1 << 30))) { mem_flush_cache(); }
 
         uint32_t message = mmio_read(MAILBOX_0_READ);
         uint32_t data = message & MAILBOX_DATA_MASK;
