@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+void mem_flush_cache();
+void mem_barrier();
+
 void mmio_write(uint32_t address, uint32_t val);
 uint32_t mmio_read(uint32_t address);
 
