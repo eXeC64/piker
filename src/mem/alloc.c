@@ -151,6 +151,13 @@ uint32_t mem_alloc(uint32_t size) {
             }
         }
 
+        /* if node is null and next table is null
+         * then we're out of memory and should
+         * try to allocate a new table */
+        if(node == NULL && table->next_table == NULL) {
+            table->next_table = (uint32_t) mem_alloc_table();
+        }
+
         table = (alloc_table_t*) table->next_table;
     }
 
@@ -212,6 +219,7 @@ void mem_free(uint32_t addr) {
         }
 
         table = (alloc_table_t*) table->next_table;
+        prev_node = NULL;
     }
 
     if(node == NULL || node->start != addr) {
