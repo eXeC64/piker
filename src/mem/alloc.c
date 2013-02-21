@@ -24,22 +24,40 @@ typedef struct {
     uint32_t _padding[4];       /* padding, 4 + 4 + 4 + 18*226 + 16 = 4096  */
 } alloc_table_t;
 
-/* Base allocation table is statically declared, and page aligned */
-alloc_table_t base_table __attribute__((aligned (4096)));
+/* address of first table */
+alloc_table_t* base_table;
 
-void mem_alloc_init() {
-    frame_alloc(&(base_table.frame));
-    base_table.next_table = NULL;
-    base_table.start_node = (uint32_t)&(base_table.nodes[0]);
+alloc_table_t* mem_alloc_table() {
+    uint32_t table_frame = NULL;
+    uint32_t mem_frame = NULL;
 
-    for(uint32_t i = 0; i < 226; ++i) {
-        base_table.nodes[i].flags = 0;
+    if(frame_alloc(&table_frame)) {
+        if(frame_alloc(&mem_frame)) {
+            alloc_table_t* table = (alloc_table_t*) table_frame;
+
+            table->next_table = NULL;
+            table->start_node = (uint32_t) &(table->nodes[0]);
+
+            for(uint32_t i = 0; i < 226; ++i) {
+                table->nodes[i].flags = 0;
+            }
+
+            table->nodes[0].start = mem_frame;
+            table->nodes[0].size = 4096;
+            table->nodes[0].next_node = NULL;
+            table->nodes[0].flags = NODE_VALID;
+
+            return table;
+        } else {
+            frame_free(table_frame);
+        }
     }
 
-    base_table.nodes[0].start = base_table.frame;
-    base_table.nodes[0].size = 4096;
-    base_table.nodes[0].next_node = NULL;
-    base_table.nodes[0].flags = NODE_VALID; /* valid, but not used */
+    return NULL;
+}
+
+void mem_alloc_init() {
+    base_table = (alloc_table_t*) mem_alloc_table();
 }
 
 alloc_node_t* mem_get_best_node(alloc_table_t* table, uint32_t size) {
@@ -110,7 +128,7 @@ uint32_t mem_alloc(uint32_t size) {
     /* walk allocation tables, find space that fits exactly, if none fit exactly, return the one that fits best */
     alloc_node_t* best_node = NULL;
     alloc_table_t* best_table = NULL;
-    alloc_table_t* table = &base_table;
+    alloc_table_t* table = base_table;
 
     while(table != NULL) {
         alloc_node_t* node = mem_get_best_node(table, size);
@@ -172,7 +190,7 @@ uint32_t mem_alloc(uint32_t size) {
 
 void mem_free(uint32_t addr) {
     /* walk the tables, find the node that starts at addr */
-    alloc_table_t* table = &base_table;
+    alloc_table_t* table = base_table;
     alloc_node_t* node = NULL;
     alloc_node_t* prev_node = NULL;
 
