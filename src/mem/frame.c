@@ -91,7 +91,7 @@ uint32_t frame_alloc(uint32_t* frame) {
                 /* If the frame is free */
                 if(0 == frame_get(f)) {
                     frame_set(f, 1);
-                    *frame = f;
+                    *frame = f + 0xC0000000; /* virt address */
                     return 1;
                 }
             }
@@ -118,6 +118,6 @@ uint32_t frame_alloc_mult_contig(uint32_t* frames, uint32_t num) {
 }
 
 void frame_free(uint32_t frame) {
-    frame_set(frame, 0);
+    frame_set(frame - 0xC0000000, 0); /* convert from virt address */
 }
 

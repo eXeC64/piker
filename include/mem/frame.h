@@ -16,9 +16,6 @@
  *  The frames are kept track of in a bitmap.
  *
  *  There are 131072 frames, (512MiB/4KiB)
- *  
- *  Let's number them from 0 (being 0x0 to 0x0FFF)
- *  then 1, being 0x1000 to 0x1FFF, etc.
  */
 
 void frame_init();
