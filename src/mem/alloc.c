@@ -3,232 +3,231 @@
 #include "mem/alloc.h"
 #include "mem/frame.h"
 
-/*
- * alloc_table is 4kb and manages up to
- * 16 frames (64kb), and up to 335 gaps
- * within those 16 frames.
- *
- * It contains a list of frames it's using
- * and a linked list of gaps.
- *
- * It also has a pointer to the next
- * allocation table, so more than 64kb
- * can be indexed.
- */
-
-/* 12 bytes */
+/* 18 bytes */
 typedef struct {
-    uint32_t start; /* 0 if node unused, virt address (0xC0000000+) otherwise */
-    uint32_t size; /* 0 if node unused, 1+ otherwise */
-    struct alloc_node_t* next; /* 0 if no node after this, virt address otherwise */
+    uint32_t start;             /* start address in memory  */
+    uint32_t size;              /* size covered by node     */
+    uint32_t next_node;         /* address of next node     */
+    uint16_t flags;             /* bit flags for node       */
 } alloc_node_t;
 
-/* 4096 bytes exactly - 1 frame */
+/* bit masks for alloc_node_t.flags */
+#define NODE_VALID 1
+#define NODE_ALLOCATED 1<<1
+
+/* 4096 bytes */
 typedef struct {
-    uint32_t num_frames; /* number of frames used */
-    alloc_node_t* first_node; /* first usable node */
-    struct alloc_table_t * next; /* next allocation table */
-    uint32_t frames[16]; /* array of frames used */
-    alloc_node_t nodes[335]; /* array of nodes in the linked list */
+    uint32_t frame;             /* address of frame being sub-allocated */
+    uint32_t next_table;        /* address of next allocation table     */
+    uint32_t start_node;
+    alloc_node_t nodes[226];    /* array of allocation nodes            */
+    uint32_t _padding[4];       /* padding, 4 + 4 + 4 + 18*226 + 16 = 4096  */
 } alloc_table_t;
 
 /* Base allocation table is statically declared, and page aligned */
 alloc_table_t base_table __attribute__((aligned (4096)));
 
-void alloc_init() {
-    base_table.num_frames = 0;
-    base_table.first_node = NULL;
-    base_table.next = NULL;
+void mem_alloc_init() {
+    frame_alloc(&(base_table.frame));
+    base_table.next_table = NULL;
+    base_table.start_node = (uint32_t)&(base_table.nodes[0]);
 
-    for(uint32_t i = 0; i < 16; ++i) {
-        base_table.frames[i] = 0;
+    for(uint32_t i = 0; i < 226; ++i) {
+        base_table.nodes[i].flags = 0;
     }
 
-    for(uint32_t i = 0; i < 335; ++i) {
-        base_table.nodes[i].start = 0;
-        base_table.nodes[i].size = 0;
-        base_table.nodes[i].next = 0;
-    }
-
-    /* We'll start with 1 frame by default */
-    if( 0 == frame_alloc(base_table.frames) ) {
-        return; /* If this failed we're screwed. */
-    }
-
-    base_table.num_frames = 1;
-
-    base_table.first_node = (alloc_node_t*) &(base_table.nodes[0]);
-
-    /* start address of free space as a virt address */
-    base_table.first_node->start = base_table.frames[0] + 0xC0000000;
-    base_table.first_node->size = 4096;
-    base_table.first_node->next = NULL;
+    base_table.nodes[0].start = base_table.frame;
+    base_table.nodes[0].size = 4096;
+    base_table.nodes[0].next_node = NULL;
+    base_table.nodes[0].flags = NODE_VALID; /* valid, but not used */
 }
 
-uint32_t mem_alloc(uint32_t size) {
+alloc_node_t* mem_get_best_node(alloc_table_t* table, uint32_t size) {
+    alloc_node_t* best_node = NULL;
 
-    if(base_table.first_node == NULL && base_table.next == NULL) {
-        /* No free space left. TODO allocate more space */
+    if(table == NULL) {
         return NULL;
     }
 
-    /* search for smallest free space that fits */
-    uint32_t best_size = base_table.first_node->size;
-    alloc_node_t* best_node = base_table.first_node;
+    alloc_node_t* cur_node = (alloc_node_t*) table->start_node;
 
-    alloc_node_t* prev = NULL;
-    alloc_node_t* cur = base_table.first_node;
-    alloc_node_t* next = (alloc_node_t*) cur->next;
+    while(cur_node != NULL) {
 
-    /*
-       Wait until we've either found a perfect fit
-       or have run out of nodes to scan
-    */
+        /* check if node is valid */
+        if(cur_node->flags & NODE_VALID) {
 
-    while(best_size != size) {
-        if(cur->size < best_size && cur->size >= size) {
-            /* New best fit */
-            best_size = cur->size;
-            best_node = cur;
-        }
-        /* Move onto the next node if valid*/
-        if(next != NULL) {
-            prev = cur;
-            cur = next;
-        } else {
-            break;
-        }
-    }
+            /* check if this node is free */
+            if(0 == (cur_node->flags & NODE_ALLOCATED)) {
 
-    if(best_size == size) {
-        /* Fits perfectly, this node simply gets removed */
+                /* the node is valid and available, check the size */
+                if(cur_node->size == size) {
+                    return cur_node;
+                }
 
-        /* If this is the first node, point first node to next node */
-        if(base_table.first_node == cur) {
-            base_table.first_node = (alloc_node_t*) cur->next;
-        } else {
-            /* Point previous node to next node */
-            if(prev != NULL) {
-                prev->next = (struct alloc_node_t*) next;
+                if(cur_node->size > size) {
+
+                    /* see if this node is the best match so far */
+                    if(best_node == NULL) {
+                        best_node = cur_node;
+                    } else if(best_node != NULL && best_node->size > cur_node->size) {
+                        best_node = cur_node;
+                    }
+                }
             }
+
+            /* walk on */
+            cur_node = (alloc_node_t*) cur_node->next_node;
+
+        } else {
+            /* node not valid, stop walking */
+            cur_node = NULL;
         }
-
-        /* Zero out this node and return the pointer */
-        uint32_t pointer = cur->start;
-
-        cur->start = 0;
-        cur->size = 0;
-        cur->next = NULL;
-
-        return pointer;
-
-    } else {
-        /* We need to shrink this node
-         * It is fairly easy, we just
-         * move the start of this node
-         * forwards and decrease the size.
-         */
-
-
-        uint32_t pointer = (cur->start);
-
-        cur->start += size;
-        cur->size -= size;
-
-        return pointer;
     }
 
-    /* Execution should never reach here. */
+    return best_node;
+}
+
+alloc_node_t* mem_get_unused_node(alloc_table_t* table) {
+    if(table == NULL) {
+        return NULL;
+    }
+
+    alloc_node_t* cur_node = (alloc_node_t*) table->start_node;
+
+    while(cur_node != NULL) {
+        /* check if node is valid */
+        if(cur_node->flags & NODE_VALID) {
+            /* walk on */
+            cur_node = (alloc_node_t*) cur_node->next_node;
+        } else {
+            /* node not valid, it's free for us to use */
+            return cur_node;
+        }
+    }
+
     return NULL;
 }
 
-void mem_free(uint32_t addr, uint32_t size) {
+uint32_t mem_alloc(uint32_t size) {
+    if(size > 4096) {
+        /* maximum allocation size is 4k currently */
+        return NULL;
+    }
 
-    /* Walk through the linked list.
-     * If a node is either infront of or behind
-     * the allocation we expand into the now free
-     * space. We then attempt to merge, as long
-     * as we're not merging across a frame
-     * boundary (0x1000).
-     */
+    /* walk allocation tables, find space that fits exactly, if none fit exactly, return the one that fits best */
+    alloc_node_t* best_node = NULL;
+    alloc_table_t* best_table = NULL;
+    alloc_table_t* table = &base_table;
 
-    if(base_table.first_node == NULL) {
-        /* Nothing to walk. We're screwed. */
+    while(table != NULL) {
+        alloc_node_t* node = mem_get_best_node(table, size);
+        if(node != NULL) {
+
+            if(best_node == NULL) {
+                best_node = node;
+                best_table = table;
+            }
+
+            if(node->size == size) {
+                best_node = node;
+                best_table = table;
+                break;
+            }
+
+            if(node->size < best_node->size) {
+                best_node = node;
+                best_table = table;
+            }
+        }
+
+        table = (alloc_table_t*) table->next_table;
+    }
+
+    /* we now have the best fitting node */
+
+    /* if it fits exactly, set the node as allocated */
+    if(best_node->size == size) {
+        best_node->flags |= NODE_ALLOCATED;
+        return best_node->start;
+    }
+
+    /* doesn't fit exactly, split the node */
+    if(best_node->size > size) {
+        alloc_node_t* next_node = (alloc_node_t*) best_node->next_node;
+        alloc_node_t* new_node = mem_get_unused_node(best_table);
+
+        if(new_node == NULL) {
+            /* out of nodes to use, abort */
+            return NULL;
+        }
+
+        new_node->start = best_node->start + size;
+        new_node->size = best_node->size - size;
+        new_node->next_node = (uint32_t) next_node;
+        new_node->flags = NODE_VALID;
+
+        best_node->size -= size;
+        best_node->next_node = (uint32_t) new_node;
+        best_node->flags |= NODE_ALLOCATED;
+
+        return best_node->start;
+    }
+
+    /* execution should never get here, we must have failed */
+    return NULL;
+}
+
+void mem_free(uint32_t addr) {
+    /* walk the tables, find the node that starts at addr */
+    alloc_table_t* table = &base_table;
+    alloc_node_t* node = NULL;
+    alloc_node_t* prev_node = NULL;
+
+    while(table != NULL) {
+        node = (alloc_node_t*) table->start_node;
+
+        while(node != NULL) {
+
+            if(node->start == addr) {
+                break;
+            }
+
+            prev_node = node;
+            node = (alloc_node_t*) node->next_node;
+        }
+
+        if(node && node->start == addr) {
+            break;
+        }
+
+        table = (alloc_table_t*) table->next_table;
+    }
+
+    if(node == NULL || node->start != addr) {
+        /* No such allocation, hmmm */
         return;
     }
 
-    alloc_node_t* prev = NULL;
-    alloc_node_t* cur = base_table.first_node;
-    alloc_node_t* next = (alloc_node_t*) cur->next;
-
-    while(TRUE) {
-        /* Check infront of current node */
-        if(cur->start > addr && cur->start - size == addr) {
-            /* We're just after the freed memory.
-             * Let's expand into it.
-             */
-            cur->start = addr;
-            cur->size += size;
-
-            /* Now let's check if we can merge. */
-            if(prev != NULL) {
-                if(prev->start + prev->size == cur->start) {
-                    /* We're adjacent. Now, as long as we're
-                     * not a frame boundary we can merge.
-                     */
-                    if(cur->start & 0xFFF) {
-                        prev->size += cur->size;
-                        prev->next = cur->next;
-
-                        cur->size = 0;
-                        cur->start = 0;
-                        cur->next = NULL;
-                    }
-                }
-            }
-
-            /* Freed, time to leave */
-            return;
-        }
-
-        if(cur->start < addr && cur->start + cur->size == addr) {
-            /* We're just before the freed memory.
-             * Let's expand into i.
-             */
-            cur->size += size;
-
-            /* Now let's check if we can merge. */
-            if(next != NULL) {
-                if(cur->start + cur->size == next->start) {
-                    /* We're adjacent. Now, as long as we're
-                     * not a frame boundary we can merge.
-                     */
-                    if(next->start & 0xFFF) {
-                        cur->size += next->size;
-                        cur->next = next->next;
-
-                        next->size = 0;
-                        next->start = 0;
-                        next->next = NULL;
-                    }
-                }
-            }
-            /* Freed, time to leave */
-            return;
-        }
-
-        /* Move onto the next node if valid*/
-        if(next != NULL) {
-            prev = cur;
-            cur = next;
-        } else {
-            break;
-        }
+    /* mark the node as free */
+    if(node->flags & NODE_ALLOCATED) {
+        node->flags ^= NODE_ALLOCATED;
     }
 
-    /* If execution reaches here then we've got no
-     * nodes adjacent to the freed memory. Let's just
-     * create a new node and insert it.
-     */
+    /* now lets merge any adjacent free nodes */
 
+    alloc_node_t* next_node = (alloc_node_t*) node->next_node;
+
+    /* check if next node is free, if so, merge into it */
+    if(next_node != NULL && next_node->flags & NODE_VALID && 0 == (next_node->flags & NODE_ALLOCATED)) {
+        node->size += next_node->size;
+        node->next_node = next_node->next_node;
+        next_node->flags = 0;
+    }
+
+    /* check if previous node is free, if so, it merges into us */
+    if(prev_node != NULL && prev_node->flags & NODE_VALID && 0 == (prev_node->flags & NODE_ALLOCATED)) {
+        prev_node->size += node->size;
+        prev_node->next_node = node->next_node;
+        node->flags = 0;
+    }
 }
