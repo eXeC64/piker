@@ -12,7 +12,6 @@ Harry.
 ##Todo list
 
 * Finish memory management
-    * Implement dynamic memory allocation in kernel space
     * Implement paging for user space
 * Start handling interrupts
     * Add some basic syscalls
