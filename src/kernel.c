@@ -13,43 +13,30 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
     frame_init();
     mem_alloc_init();
 
-    uint32_t fb_ptr;
-    frame_alloc(&fb_ptr);
+    uint32_t alloc_1 = mem_alloc(256);
+    uart_printf("alloc_1 : 0x%x\n", alloc_1);
 
-    framebuffer_request_t* fb = (framebuffer_request_t*) fb_ptr;
+    uint32_t alloc_2 = mem_alloc(256);
+    uart_printf("alloc_2 : 0x%x\n", alloc_2);
 
-    fb->width = 800;
-    fb->height = 600;
-    fb->virtual_width = 800;
-    fb->virtual_height = 600;
-    fb->pitch = 0;
-    fb->depth = 32;
-    fb->x_offset = 0;
-    fb->y_offset = 0;
-    fb->pointer = NULL;
-    fb->size = 0;
+    uint32_t alloc_3 = mem_alloc(512);
+    uart_printf("alloc_3 : 0x%x\n", alloc_3);
 
-    mailbox_send(fb_ptr, 0x1);
+    mem_free(alloc_2);
 
-    mailbox_read(0x1);
+    uint32_t alloc_4 = mem_alloc(256);
+    uart_printf("alloc_4 : 0x%x\n", alloc_4);
 
-    while(fb->pointer == NULL) {
-        uart_printf("pointer still null at %ims\n", (uint32_t)(timer_now() / 1000));
-        timer_sleep(1000);
-    }
+    mem_free(alloc_1);
 
-    uart_printf("w,h: %i,%i\n", fb->width, fb->height);
-    uart_printf("size: %i\n", fb->size);
-    uart_printf("depth: %i\n", fb->depth);
+    uint32_t alloc_5 = mem_alloc(256);
+    uart_printf("alloc_5 : 0x%x\n", alloc_5);
 
-    fb->pointer += 0x80000000;
+    mem_free(alloc_4);
+    mem_free(alloc_5);
 
-    for(uint32_t i = 0; i < fb->size; ++i) {
-        uint32_t* pixel = (uint32_t*) fb->pointer + i / 4;
-        *pixel = 0xFF0000FF;
-    }
-
-    /* y * pitch + x * 3 + rgb_channel */
+    uint32_t alloc_6 = mem_alloc(512);
+    uart_printf("alloc_6 : 0x%x\n", alloc_6);
 
     while(TRUE) {
         uart_printf("time: %ims\n", (uint32_t)(timer_now() / 1000));
