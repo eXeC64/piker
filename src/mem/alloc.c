@@ -92,16 +92,9 @@ alloc_node_t* mem_get_unused_node(alloc_table_t* table) {
         return NULL;
     }
 
-    alloc_node_t* cur_node = (alloc_node_t*) table->start_node;
-
-    while(cur_node != NULL) {
-        /* check if node is valid */
-        if(cur_node->flags & NODE_VALID) {
-            /* walk on */
-            cur_node = (alloc_node_t*) cur_node->next_node;
-        } else {
-            /* node not valid, it's free for us to use */
-            return cur_node;
+    for(uint32_t i = 0; i < 226; ++i) {
+        if(0 == (table->nodes[i].flags & NODE_VALID)) {
+            return &(table->nodes[i]);
         }
     }
 
