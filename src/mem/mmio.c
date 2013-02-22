@@ -37,12 +37,12 @@ uint32_t inline mem_read(uint32_t address) {
     return *((uint32_t*)address);
 }
 
-void inline mem_set(int32_t* address, uint32_t len, int32_t val) {
-    for(int32_t* ptr = address; ptr < address + len; ptr++) { *ptr = val; }
+void inline mem_set(uint32_t address, uint32_t len, uint32_t val) {
+    for(uint32_t ptr = address; ptr < address + len; ptr++) { *((uint32_t*)ptr) = val; }
 }
 
-void inline mem_copy(int32_t* src, int32_t* dst, uint32_t len) {
-    for(int32_t offset = 0; offset < len; offset++) {
-        *(dst + offset) = *(src + offset);
+void inline mem_copy(uint32_t src, uint32_t dst, uint32_t len) {
+    for(uint32_t offset = 0; offset < len; offset++) {
+        *((uint32_t*)(dst + offset)) = *((uint32_t*)src + offset);
     }
 }
