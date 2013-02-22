@@ -113,7 +113,27 @@ uint32_t frame_alloc_mult(uint32_t* frames, uint32_t num) {
 }
 
 uint32_t frame_alloc_mult_contig(uint32_t* frames, uint32_t num) {
-    /* I don't need this yet. I can't be bothered to fix it. */
+    /* Iterate over all the frames */
+    for(uint32_t i = 0; i < 131072; ++i) {
+        if(frame_get(i * 0x1000) == 0) {
+            uint8_t enough = TRUE;
+
+            for(uint32_t j = 0; j < num; ++j) {
+                if(frame_get(i + j * 0x1000) == 1) {
+                    enough = FALSE;
+                    break;
+                }
+            }
+
+            if(enough == TRUE) {
+                for(uint32_t j = 0; j < num; ++j) {
+                    frame_set(i + j * 0x1000, 1);
+                    frames[j] = i + j * 0x1000 + 0xC0000000;
+                }
+                return num;
+            }
+        }
+    }
     return 0;
 }
 
