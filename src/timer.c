@@ -5,8 +5,8 @@
 uint64_t timer_now() {
     mem_barrier();
 
-    uint64_t low = mmio_read(SYS_TIMER_CLO);
-    uint64_t high = mmio_read(SYS_TIMER_CHI);
+    uint64_t low = mem_read(SYS_TIMER_CLO);
+    uint64_t high = mem_read(SYS_TIMER_CHI);
 
     return (high << 32) | low;
 }

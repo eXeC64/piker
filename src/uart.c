@@ -5,28 +5,28 @@
 #include "timer.h"
 
 void uart_init() {
-    mmio_write(UART0_CR, 0x00000000);
-    mmio_write(GPPUD,0x00000000);
+    mem_write(UART0_CR, 0x00000000);
+    mem_write(GPPUD,0x00000000);
     timer_sleep(1);
  
-    mmio_write(GPPUDCLK0, (1 << 14) | (1 << 15));
+    mem_write(GPPUDCLK0, (1 << 14) | (1 << 15));
     timer_sleep(1);
  
-    mmio_write(GPPUDCLK0, 0x00000000);
-    mmio_write(UART0_ICR, 0x7FF);
-    mmio_write(UART0_IBRD, 1);
-    mmio_write(UART0_FBRD, 40);
+    mem_write(GPPUDCLK0, 0x00000000);
+    mem_write(UART0_ICR, 0x7FF);
+    mem_write(UART0_IBRD, 1);
+    mem_write(UART0_FBRD, 40);
  
-    mmio_write(UART0_LCRH, (1 << 4) | (1 << 5) | (1 << 6));
-    mmio_write(UART0_IMSC, (1 << 1) | (1 << 4) | (1 << 5) |
+    mem_write(UART0_LCRH, (1 << 4) | (1 << 5) | (1 << 6));
+    mem_write(UART0_IMSC, (1 << 1) | (1 << 4) | (1 << 5) |
 		    (1 << 6) | (1 << 7) | (1 << 8) |
 		    (1 << 9) | (1 << 10));
-    mmio_write(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));
+    mem_write(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));
 }
  
 void uart_putc(uint8_t byte) {
-    while(mmio_read(UART0_FR) & (1 << 5)) { ; }
-    mmio_write(UART0_DR, byte);
+    while(mem_read(UART0_FR) & (1 << 5)) { ; }
+    mem_write(UART0_DR, byte);
 }
 
 void uart_puts(const uint8_t *str) {
@@ -88,11 +88,11 @@ void uart_printf(const uint8_t *format, ...) {
 
 int8_t uart_getc() {
     while (1) {
-        if (!(mmio_read(UART0_FR) & (1 << 4))) {
+        if (!(mem_read(UART0_FR) & (1 << 4))) {
 	    break;
 	}
     }
-    return mmio_read(UART0_DR);
+    return mem_read(UART0_DR);
 }
 
 void uart_gets(uint8_t* buf, uint32_t len) {
