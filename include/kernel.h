@@ -9,7 +9,6 @@
 
 /* Commonly used headers */
 #include "mem/mmio.h"
-#include "mem/alloc.h"
 
 /* Global constants */
 #define NULL 0
