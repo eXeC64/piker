@@ -29,20 +29,20 @@ void inline mem_barrier() {
            );
 }
 
-void inline mem_write(uint32_t address, uint32_t val) {
+void inline mem_write(uintptr_t address, uint32_t val) {
     *((uint32_t*)address) = val;
 }
 
-uint32_t inline mem_read(uint32_t address) {
+uint32_t inline mem_read(uintptr_t address) {
     return *((uint32_t*)address);
 }
 
-void inline mem_set(uint32_t address, uint32_t len, uint32_t val) {
-    for(uint32_t ptr = address; ptr < address + len; ptr++) { *((uint32_t*)ptr) = val; }
+void inline mem_set(uintptr_t address, size_t len, uint8_t val) {
+    for(uintptr_t ptr = address; ptr < address + len; ptr++) { *((uint8_t*)ptr) = val; }
 }
 
-void inline mem_copy(uint32_t src, uint32_t dst, uint32_t len) {
-    for(uint32_t offset = 0; offset < len; offset++) {
-        *((uint32_t*)(dst + offset)) = *((uint32_t*)src + offset);
+void inline mem_copy(uintptr_t src, uintptr_t dst, size_t len) {
+    for(uintptr_t offset = 0; offset < len; offset++) {
+        *((uint8_t*)(dst + offset)) = *((uint8_t*)src + offset);
     }
 }
