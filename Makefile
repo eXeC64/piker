@@ -26,6 +26,9 @@ clean:
  
 dist-clean: clean
 	$(RM) -f *.d
+
+run:
+	../raspbootin/raspbootcom/raspbootcom /dev/ttyUSB0 kernel.img
  
 %.o: %.c
 	$(ARMGNU)-gcc $(CFLAGS) -c $< -I include -o $@
@@ -34,3 +37,4 @@ dist-clean: clean
 	$(ARMGNU)-as $< -o $@
 
 
+.PHONY: clean dist-clean run
