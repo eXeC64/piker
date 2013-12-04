@@ -95,8 +95,8 @@ int8_t uart_getc() {
     return mem_read(UART0_DR);
 }
 
-void uart_gets(uint8_t* buf, uint32_t len) {
-    uint32_t recv = 0;
+void uart_gets(uint8_t* buf, size_t len) {
+    size_t recv = 0;
     while(recv < len - 1) {
         uint8_t c = uart_getc();
 
