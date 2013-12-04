@@ -1,4 +1,4 @@
-PREFIX ?= /opt/arm-2008q3
+PREFIX ?= /opt/gcc-rpi
 ARMGNU ?= $(PREFIX)/bin/arm-none-eabi
 
 CFLAGS ?= -Wall -Werror -Wno-pointer-sign --std=c99
