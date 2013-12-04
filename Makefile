@@ -16,7 +16,7 @@ all: kernel.img
 include $(wildcard *.d)
 
 kernel.elf: $(OBJS) linker.ld
-	$(ARMGNU)-ld $(OBJS) $(PREFIX)/lib/gcc/arm-none-eabi/4.3.2/libgcc.a -T linker.ld -o $@
+	$(ARMGNU)-ld $(OBJS) $(PREFIX)/lib/gcc/arm-none-eabi/4.7.4/libgcc.a -T linker.ld -o $@
 
 kernel.img: kernel.elf
 	$(ARMGNU)-objcopy kernel.elf -O binary kernel.img
