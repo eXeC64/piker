@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-uint32_t strlen(const uint8_t* str);
+size_t strlen(const uint8_t* str);
 
 void int_to_str(int64_t value, uint64_t radix, uint8_t* buf);
 
