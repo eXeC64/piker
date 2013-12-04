@@ -1,8 +1,9 @@
 #ifndef UART_H
 #define UART_H
 
-#include <stdint.h>
 #include <stdarg.h>
+
+#include "types.h"
 
 void uart_init();
 void uart_putc(uint8_t byte);

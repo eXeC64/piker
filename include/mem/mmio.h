@@ -1,7 +1,7 @@
 #ifndef MMIO_H
 #define MMIO_H
 
-#include <stdint.h>
+#include "types.h"
 
 void mem_flush_cache();
 void mem_barrier();

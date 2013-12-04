@@ -4,8 +4,11 @@
 /* Utility header, included at top of all source files */
 
 /* External headers */
-#include <stdint.h>
 #include <stdarg.h>
+#include <errno.h>
+
+/* Additional types */
+#include "types.h"
 
 /* Commonly used headers */
 #include "mem/mmio.h"

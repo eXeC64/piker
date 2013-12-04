@@ -1,7 +1,7 @@
 #ifndef FRAME_H
 #define FRAME_H
 
-#include <stdint.h>
+#include "types.h"
 
 /*
  *  Frames are 4kb chunks of physical memory.

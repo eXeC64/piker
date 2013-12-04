@@ -1,7 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include <stdint.h>
+#include "types.h"
 
 uint32_t strlen(const uint8_t* str);
 
