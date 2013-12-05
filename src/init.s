@@ -13,17 +13,23 @@ start:
     #Set the boundary to 2, 1GB is paged by TTBR0, the rest by TTBR1
     ldr r4, =2
     mcr p15, 0, r4, c2, c0, 2
-        
+
     #Set domain permissions
+    #0b 0101 0101 0101 0101  0101 0101 0101 0101
+    #Every domain defers access to AP bits in the TLB
     ldr r4, =0x55555555
     mcr p15, 0, r4, c3, c0, 0
 
     #Enable paging
-    ldr r5, =0xCF7FCBF8
+    #enabled bits:
+    # 23 (subpage AP bits disabled)
+    # 12 (L1 ins cache enabled)
+    # 11 (flow prediction enabled)
+    # 2  (L1 data cache enabled)
+    # 1  (strict alignment fault checking)
+    # 0  (mmu enabled)
+
     ldr r6, =0x00801807
-    mrc p15, 0, r4, c1, c0, 0
-    and r4, r4, r5
-    orr r4, r4, r6
     mcr p15, 0, r4, c1, c0, 0
 
     #We're now paged using virtual memory.
@@ -34,7 +40,7 @@ high_addr:
     #Now we're in higher memory, lets unmap lower memory
 
     #Load the blank table into TTBR0
-    ldr r4, =user_pagetable - 0xC0000000
+    ldr r4, =blank_pagetable - 0xC0000000
     mcr p15, 0, r4, c2, c0, 0
 
     #Flush the cache of old translations
@@ -145,9 +151,9 @@ user_stack_top:
 
 #This is the default user pagetable, used to clear the mapping
 .balign 4096
-.global user_pagetable
+.global blank_pagetable
 
-user_pagetable:
+blank_pagetable:
     #All 1GB unmapped (0x00000000-0x3FFFFFFF)
     .fill 4*1024, 1, 0
 
@@ -243,7 +249,7 @@ kernel_pagetable:
 
     #Unmapped (0xE0000000-0xF1FFFFFF)
     .fill   4*288, 1, 0
-        
+
     #Linear map peripherals (0xF2000000-0xF2FFFFFF)
     #Using same layout as linux, as given by
     #BCM2825-ARM-Peripherals manual
