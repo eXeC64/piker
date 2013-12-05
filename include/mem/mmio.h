@@ -3,6 +3,10 @@
 
 #include "types.h"
 
+/* Conversion between virtual and physical addresses */
+#define V2P(x) ((x - 0xC0000000))
+#define P2V(x) ((x + 0xC0000000))
+
 void mem_flush_cache();
 void mem_barrier();
 

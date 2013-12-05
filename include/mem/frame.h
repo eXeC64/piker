@@ -18,14 +18,15 @@
  *  There are 131072 frames, (512MiB/4KiB)
  */
 
-void frame_init();
+int8_t frame_init();
 
-uint8_t frame_get(uintptr_t frame);
-void frame_set(uintptr_t frame, uint8_t status);
+int8_t frame_get(uintptr_t frame);
+int8_t frame_set(uintptr_t frame, uint8_t status);
 
-uint32_t frame_alloc(uintptr_t* frame);
-uint32_t frame_alloc_mult(uintptr_t* frames, size_t num);
-uint32_t frame_alloc_mult_contig(uintptr_t* frames, size_t num);
-void frame_free(uintptr_t frame);
+int8_t frame_alloc(uintptr_t* frame);
+int8_t frame_free(uintptr_t frame);
+
+size_t frame_alloc_mult(uintptr_t* frames, size_t num);
+size_t frame_alloc_mult_contig(uintptr_t* frames, size_t num);
 
 #endif /*FRAME_H*/

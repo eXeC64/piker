@@ -10,15 +10,15 @@
 
 uint32_t frames_bitmap[4096] __attribute__((aligned (4096)));
 
-void frame_init() {
+int8_t frame_init() {
     /* All frames are free to begin with */
     for(uint32_t i = 0; i < 4096; ++i) {
         frames_bitmap[i] = 0x00000000;
     }
 
     /* Now lets mark the kernel's frames as taken */
-    uintptr_t kstart = (uintptr_t)(&_start) - 0xC0000000;
-    uintptr_t kend   = (uintptr_t)(&_end)   - 0xC0000000;
+    uintptr_t kstart = V2P((uintptr_t)&_start);
+    uintptr_t kend   = V2P((uintptr_t)&_end);
 
     for(uintptr_t i = kstart; i < kend; i += 0x1000) {
         frame_set(i, 1);
@@ -36,9 +36,14 @@ void frame_init() {
     for(uintptr_t i = gpu_start; i < gpu_end; i += 0x1000) {
         frame_set(i, 1);
     }
+
+    /* Mark frame 0 as taken, so null pointers *NEVER* point to anything */
+    frame_set(0, 1);
+
+    return 0;
 }
 
-uint8_t frame_get(uintptr_t frame) {
+int8_t frame_get(uintptr_t frame) {
     /* convert from physical address to frame index */
     uint32_t fi = frame / 0x1000;
 
@@ -57,13 +62,13 @@ uint8_t frame_get(uintptr_t frame) {
     }
 }
 
-void frame_set(uintptr_t frame, uint8_t status) {
+int8_t frame_set(uintptr_t frame, uint8_t status) {
     /* convert from physical address to frame index */
     uint32_t fi = frame / 0x1000;
 
     /* cant set a non-existant frame */
     if(fi > 131071) {
-        return;
+        return -EINVAL;
     }
 
     if(status > 1) {
@@ -76,9 +81,11 @@ void frame_set(uintptr_t frame, uint8_t status) {
     bits |= (status << (fi % 32));
 
     frames_bitmap[fi / 32] = bits;
+
+    return 0;
 }
 
-uint32_t frame_alloc(uintptr_t* frame) {
+int8_t frame_alloc(uintptr_t* frame) {
     /* Iterate over all the frames */
     for(uint32_t i = 0; i < 4096; ++i) {
         if(frames_bitmap[i] ^ 0xFFFFFFFF) {
@@ -90,16 +97,16 @@ uint32_t frame_alloc(uintptr_t* frame) {
                 /* If the frame is free */
                 if(0 == frame_get(f)) {
                     frame_set(f, 1);
-                    *frame = f + 0xC0000000; /* virt address */
-                    return 1;
+                    *frame = P2V(f);
+                    return 0;
                 }
             }
         }
     }
-    return 0;
+    return -ENOMEM;
 }
 
-uint32_t frame_alloc_mult(uintptr_t* frames, size_t num) {
+size_t frame_alloc_mult(uintptr_t* frames, size_t num) {
     for(uint32_t i = 0; i < num; ++i) {
         uint32_t result = frame_alloc(&(frames[i]));
         if(result == 0) {
@@ -111,7 +118,7 @@ uint32_t frame_alloc_mult(uintptr_t* frames, size_t num) {
     return num;
 }
 
-uint32_t frame_alloc_mult_contig(uintptr_t* frames, size_t num) {
+size_t frame_alloc_mult_contig(uintptr_t* frames, size_t num) {
     /* Iterate over all the frames */
     for(uint32_t i = 0; i < 131072; ++i) {
         if(frame_get(i * 0x1000) == 0) {
@@ -127,7 +134,7 @@ uint32_t frame_alloc_mult_contig(uintptr_t* frames, size_t num) {
             if(enough == TRUE) {
                 for(uint32_t j = 0; j < num; ++j) {
                     frame_set(i + j * 0x1000, 1);
-                    frames[j] = i + j * 0x1000 + 0xC0000000;
+                    frames[j] = P2V(i + j * 0x1000);
                 }
                 return num;
             }
@@ -136,7 +143,8 @@ uint32_t frame_alloc_mult_contig(uintptr_t* frames, size_t num) {
     return 0;
 }
 
-void frame_free(uintptr_t frame) {
-    frame_set(frame - 0xC0000000, 0); /* convert from virt address */
+int8_t frame_free(uintptr_t frame) {
+    frame_set(V2P(frame), 0); /* convert from virt address */
+    return 0;
 }
 
