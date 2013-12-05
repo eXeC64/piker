@@ -1,11 +1,15 @@
 #include "kernel.h"
 
 #include "uart.h"
+#include "interrupts.h"
 #include "timer.h"
 #include "mem/frame.h"
 
 void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
     uart_init();
+
+    interrupts_init();
+
     uart_puts("Piker 0.0.0\n");
 
     frame_init();
