@@ -25,6 +25,17 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
 
     pagetable_activate(pt);
 
+    __asm volatile(
+            "ldr r0, =0xdead;"
+            "ldr r1, =0xbeef;"
+            "ldr r2, =0xabad1dea;"
+            "ldr r3, =0x1234;"
+            "svc %0;"
+            : :
+            "g" (0x80)
+            : "r0", "r1", "r2", "r3"
+            );
+
     while(TRUE) {
         uart_printf("time: %ims\n", (uint32_t)(timer_now() / 1000));
 

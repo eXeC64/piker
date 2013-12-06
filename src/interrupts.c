@@ -1,18 +1,17 @@
 #include "kernel.h"
 
 #include "interrupts.h"
+#include "syscalls.h"
 #include "uart.h"
-
 
 __attribute__ ((naked)) void halt() { while(1); }
 
-__attribute__ ((interrupt ("SWI"))) void int_swi() {
+__attribute__ ((interrupt ("SWI"))) void int_swi(int32_t r0, int32_t r1, int32_t r2, int32_t r3) {
     uint32_t next_ins, swi;
     __asm volatile("mov %0, lr" : "=r" (next_ins));
     swi = *((uint32_t*)next_ins - 1) & 0x00FFFFFF;
 
-    /* Handle SWI */
-    uart_printf("Received SWI %i returns to 0x%x\n", swi, next_ins);
+    handle_syscall(swi, r0, r1, r2, r3);
 }
 
 __attribute__ ((interrupt ("ABORT"))) void int_prefetch_abort() {
