@@ -17,8 +17,17 @@ int8_t pagetable_init(uintptr_t* pt) {
 }
 
 int8_t pagetable_free(uintptr_t pt) {
-    /* walk entire table, depth first, free entire thing */
-    return -ENOSYS;
+    uintptr_t flda;
+    for(flda = pt; flda < pt + 0x1000; flda += 4) {
+        uint32_t fld = mem_read(flda);
+        if((fld & 0x3) == 0x1) {
+            uintptr_t slp = fld & 0xFFFFFC00;
+            frame_free(P2V(slp));
+        }
+    }
+
+    frame_free(pt);
+    return 0;
 }
 
 /* maps addr to frame in pagetable page, null frame unmaps */
