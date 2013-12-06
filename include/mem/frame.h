@@ -26,6 +26,7 @@ int8_t frame_set(uintptr_t frame, uint8_t status);
 int8_t frame_alloc(uintptr_t* frame);
 int8_t frame_free(uintptr_t frame);
 
+int8_t frame_alloc_aligned(uintptr_t* frame, uint32_t alignment);
 size_t frame_alloc_mult(uintptr_t* frames, size_t num);
 size_t frame_alloc_mult_contig(uintptr_t* frames, size_t num);
 

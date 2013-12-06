@@ -86,6 +86,12 @@ int8_t frame_set(uintptr_t frame, uint8_t status) {
 }
 
 int8_t frame_alloc(uintptr_t* frame) {
+    return frame_alloc_aligned(frame, 0x1000);
+}
+
+int8_t frame_alloc_aligned(uintptr_t* frame, uint32_t alignment) {
+    uint32_t mask = alignment - 1;
+
     /* Iterate over all the frames */
     for(uint32_t i = 0; i < 4096; ++i) {
         if(frames_bitmap[i] ^ 0xFFFFFFFF) {
@@ -95,7 +101,7 @@ int8_t frame_alloc(uintptr_t* frame) {
             for(uintptr_t f = i * 32 * 0x1000; f < (i+1) * 32 * 0x1000; f += 0x1000) {
 
                 /* If the frame is free */
-                if(0 == frame_get(f)) {
+                if(0 == frame_get(f) && (f & mask) == 0) {
                     frame_set(f, 1);
                     *frame = P2V(f);
                     return 0;
