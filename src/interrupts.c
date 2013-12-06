@@ -9,9 +9,15 @@ __attribute__ ((naked)) void halt() { while(1); }
 __attribute__ ((interrupt ("SWI"))) void int_swi(int32_t r0, int32_t r1, int32_t r2, int32_t r3) {
     uint32_t next_ins, swi;
     __asm volatile("mov %0, lr" : "=r" (next_ins));
-    swi = *((uint32_t*)next_ins - 1) & 0x00FFFFFF;
+    swi = mem_read(next_ins - 4) & 0x00FFFFFF;
 
     handle_syscall(swi, r0, r1, r2, r3);
+}
+
+__attribute__ ((interrupt ("IRQ"))) void int_irq() {
+    //mem_barrier();
+    mem_write(ARM_TIMER_IRQ_CLEAR, 0x0);
+    //uart_puts("irq hit!\n");
 }
 
 __attribute__ ((interrupt ("ABORT"))) void int_prefetch_abort() {
@@ -38,7 +44,7 @@ __attribute__ ((naked, aligned(32))) static void vectors(void) {
                    "b int_prefetch_abort;"
                    "b int_data_abort;"
                    "b halt;"
-                   "b halt;"
+                   "b int_irq;"
                    "b halt;"
                    );
 }
@@ -46,5 +52,12 @@ __attribute__ ((naked, aligned(32))) static void vectors(void) {
 int8_t interrupts_init() {
     /* Install vectors and enable interrupts */
     __asm volatile("mcr p15, 0, %0, c12, c0, 0" : : "r" (&vectors));
+
+    /* Make sure the IRQ and FIQ disable bits are not set */
+    uint32_t cpsr;
+    __asm volatile("mrs %0, cpsr" : "=r" (cpsr));
+    cpsr &= 0xFFFFFF3F;
+    __asm volatile("msr cpsr, %0" : : "r" (cpsr));
+
     return 0;
 }
