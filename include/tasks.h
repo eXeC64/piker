@@ -3,6 +3,6 @@
 
 #include "types.h"
 
-int8_t tasks_init();
+void tasks_init();
 
 #endif /* TASKS_H */

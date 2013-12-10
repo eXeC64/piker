@@ -5,19 +5,16 @@
 #include "uart.h"
 
 
-int8_t pagetable_init(uintptr_t* pt)
+void pagetable_init(uintptr_t* pt)
 {
-
     if(frame_alloc(pt) != 0) {
         return -ENOMEM;
     }
 
     mem_set(*pt, 4096, 0);
-
-    return 0;
 }
 
-int8_t pagetable_free(uintptr_t pt)
+void pagetable_free(uintptr_t pt)
 {
     uintptr_t flda;
     for(flda = pt; flda < pt + 0x1000; flda += 4) {
@@ -29,13 +26,11 @@ int8_t pagetable_free(uintptr_t pt)
     }
 
     frame_free(pt);
-    return 0;
 }
 
 /* maps addr to frame in pagetable page, null frame unmaps */
-int8_t pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
+void pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
 {
-
     uintptr_t pt = V2P(vpt);
     uintptr_t frame = V2P(vframe);
 
@@ -74,16 +69,13 @@ int8_t pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
     /* Flush data cache and invalidate TLB entries */
     __asm volatile ("mcr p15, 0, %0, c7, c14, 0" : : "r" (0));
     __asm volatile ("mcr p15, 0, %0, c8,  c7, 0" : : "r" (0));
-
-    return 0;
 }
 
 /* Defined in src/init.s */
 extern uint32_t blank_pagetable;
 
-int8_t pagetable_activate(uintptr_t pt)
+void pagetable_activate(uintptr_t pt)
 {
-
     /* Null pagetable means unmap it all */
     if(pt == NULL) {
         pt = (uintptr_t)&blank_pagetable;
@@ -93,7 +85,5 @@ int8_t pagetable_activate(uintptr_t pt)
 
     /* Invalidate the TLB entries */
     __asm volatile ("mcr p15, 0, %0, c8, c7, 0" : : "r" (0));
-
-    return 0;
 }
 

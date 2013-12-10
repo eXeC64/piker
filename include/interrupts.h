@@ -3,6 +3,6 @@
 
 #include "types.h"
 
-int8_t interrupts_init();
+void interrupts_init();
 
 #endif /* INTERRUPTS_H */

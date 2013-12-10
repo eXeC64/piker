@@ -3,9 +3,8 @@
 #include "tasks.h"
 
 /* Prepare the system for multi-tasking */
-int8_t tasks_init()
+void tasks_init()
 {
-
     mem_barrier();
 
     /* Enable arm timer irq */
@@ -16,6 +15,4 @@ int8_t tasks_init()
 
     /* Enable timer, timer interrupt, scale clock by / 0x100, 32 bit counter */
     mem_write(ARM_TIMER_CONTROL, 0xAA);
-
-    return 0;
 }

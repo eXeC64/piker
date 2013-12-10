@@ -57,7 +57,7 @@ __attribute__ ((naked, aligned(32))) static void vectors(void)
                    );
 }
 
-int8_t interrupts_init()
+void interrupts_init()
 {
     /* Install vectors and enable interrupts */
     __asm volatile("mcr p15, 0, %0, c12, c0, 0" : : "r" (&vectors));
@@ -67,6 +67,4 @@ int8_t interrupts_init()
     __asm volatile("mrs %0, cpsr" : "=r" (cpsr));
     cpsr &= 0xFFFFFF3F;
     __asm volatile("msr cpsr, %0" : : "r" (cpsr));
-
-    return 0;
 }
