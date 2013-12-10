@@ -4,7 +4,8 @@
 #include "string.h"
 #include "timer.h"
 
-void uart_init() {
+void uart_init()
+{
     mem_write(UART0_CR, 0x00000000);
     mem_write(GPPUD,0x00000000);
     timer_sleep(1);
@@ -24,18 +25,21 @@ void uart_init() {
     mem_write(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));
 }
  
-void uart_putc(uint8_t byte) {
+void uart_putc(uint8_t byte)
+{
     while(mem_read(UART0_FR) & (1 << 5)) { ; }
     mem_write(UART0_DR, byte);
 }
 
-void uart_puts(const uint8_t *str) {
+void uart_puts(const uint8_t *str)
+{
     while (*str) {
         uart_putc(*str++);
     }
 }
 
-void uart_printf(const uint8_t *format, ...) {
+void uart_printf(const uint8_t *format, ...)
+{
     va_list args;
     va_start(args, format);
 
@@ -86,7 +90,8 @@ void uart_printf(const uint8_t *format, ...) {
     }
 }
 
-int8_t uart_getc() {
+int8_t uart_getc()
+{
     while (1) {
         if (!(mem_read(UART0_FR) & (1 << 4))) {
 	    break;
@@ -95,7 +100,8 @@ int8_t uart_getc() {
     return mem_read(UART0_DR);
 }
 
-void uart_gets(uint8_t* buf, size_t len) {
+void uart_gets(uint8_t* buf, size_t len)
+{
     size_t recv = 0;
     while(recv < len - 1) {
         uint8_t c = uart_getc();

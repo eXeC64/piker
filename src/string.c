@@ -2,13 +2,15 @@
 
 #include "string.h"
 
-size_t strlen(const uint8_t* str) {
+size_t strlen(const uint8_t* str)
+{
     size_t len;
     for(len = 0; str[len] != 0; len++) {;}
     return len;
 }
 
-void int_to_str(int64_t value, uint64_t radix, uint8_t* buf) {
+void int_to_str(int64_t value, uint64_t radix, uint8_t* buf)
+{
    uint8_t tmp[128];
    uint8_t* tp = tmp;
    int64_t i;

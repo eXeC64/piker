@@ -5,7 +5,8 @@
 #include "uart.h"
 
 
-int8_t pagetable_init(uintptr_t* pt) {
+int8_t pagetable_init(uintptr_t* pt)
+{
 
     if(frame_alloc(pt) != 0) {
         return -ENOMEM;
@@ -16,7 +17,8 @@ int8_t pagetable_init(uintptr_t* pt) {
     return 0;
 }
 
-int8_t pagetable_free(uintptr_t pt) {
+int8_t pagetable_free(uintptr_t pt)
+{
     uintptr_t flda;
     for(flda = pt; flda < pt + 0x1000; flda += 4) {
         uint32_t fld = mem_read(flda);
@@ -31,7 +33,8 @@ int8_t pagetable_free(uintptr_t pt) {
 }
 
 /* maps addr to frame in pagetable page, null frame unmaps */
-int8_t pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe) {
+int8_t pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
+{
 
     uintptr_t pt = V2P(vpt);
     uintptr_t frame = V2P(vframe);
@@ -78,7 +81,8 @@ int8_t pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe) {
 /* Defined in src/init.s */
 extern uint32_t blank_pagetable;
 
-int8_t pagetable_activate(uintptr_t pt) {
+int8_t pagetable_activate(uintptr_t pt)
+{
 
     /* Null pagetable means unmap it all */
     if(pt == NULL) {

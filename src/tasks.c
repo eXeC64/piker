@@ -3,7 +3,8 @@
 #include "tasks.h"
 
 /* Prepare the system for multi-tasking */
-int8_t tasks_init() {
+int8_t tasks_init()
+{
 
     mem_barrier();
 

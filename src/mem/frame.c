@@ -10,7 +10,8 @@
 
 uint32_t frames_bitmap[4096] __attribute__((aligned (4096)));
 
-int8_t frame_init() {
+int8_t frame_init()
+{
     /* All frames are free to begin with */
     for(uint32_t i = 0; i < 4096; ++i) {
         frames_bitmap[i] = 0x00000000;
@@ -43,7 +44,8 @@ int8_t frame_init() {
     return 0;
 }
 
-int8_t frame_get(uintptr_t frame) {
+int8_t frame_get(uintptr_t frame)
+{
     /* convert from physical address to frame index */
     uint32_t fi = frame / 0x1000;
 
@@ -62,7 +64,8 @@ int8_t frame_get(uintptr_t frame) {
     }
 }
 
-int8_t frame_set(uintptr_t frame, uint8_t status) {
+int8_t frame_set(uintptr_t frame, uint8_t status)
+{
     /* convert from physical address to frame index */
     uint32_t fi = frame / 0x1000;
 
@@ -85,11 +88,13 @@ int8_t frame_set(uintptr_t frame, uint8_t status) {
     return 0;
 }
 
-int8_t frame_alloc(uintptr_t* frame) {
+int8_t frame_alloc(uintptr_t* frame)
+{
     return frame_alloc_aligned(frame, 0x1000);
 }
 
-int8_t frame_alloc_aligned(uintptr_t* frame, uint32_t alignment) {
+int8_t frame_alloc_aligned(uintptr_t* frame, uint32_t alignment)
+{
     uint32_t mask = alignment - 1;
 
     /* Iterate over all the frames */
@@ -112,7 +117,8 @@ int8_t frame_alloc_aligned(uintptr_t* frame, uint32_t alignment) {
     return -ENOMEM;
 }
 
-size_t frame_alloc_mult(uintptr_t* frames, size_t num) {
+size_t frame_alloc_mult(uintptr_t* frames, size_t num)
+{
     for(uint32_t i = 0; i < num; ++i) {
         uint32_t result = frame_alloc(&(frames[i]));
         if(result == 0) {
@@ -124,7 +130,8 @@ size_t frame_alloc_mult(uintptr_t* frames, size_t num) {
     return num;
 }
 
-size_t frame_alloc_mult_contig(uintptr_t* frames, size_t num) {
+size_t frame_alloc_mult_contig(uintptr_t* frames, size_t num)
+{
     /* Iterate over all the frames */
     for(uint32_t i = 0; i < 131072; ++i) {
         if(frame_get(i * 0x1000) == 0) {
@@ -149,7 +156,8 @@ size_t frame_alloc_mult_contig(uintptr_t* frames, size_t num) {
     return 0;
 }
 
-int8_t frame_free(uintptr_t frame) {
+int8_t frame_free(uintptr_t frame)
+{
     frame_set(V2P(frame), 0); /* convert from virt address */
     return 0;
 }

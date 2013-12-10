@@ -23,7 +23,8 @@ extern uint32_t _start;
 extern uint32_t _end;
 
 /* Address Table */
-enum {
+enum
+{
     IO_BASE         = 0xF2000000,
  
     SYS_TIMER_BASE  = (IO_BASE + 0x00003000),
