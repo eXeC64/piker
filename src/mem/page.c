@@ -5,13 +5,15 @@
 #include "uart.h"
 
 
-void pagetable_init(uintptr_t* pt)
+int8_t pagetable_init(uintptr_t* pt)
 {
     if(frame_alloc(pt) != 0) {
         return -ENOMEM;
     }
 
     mem_set(*pt, 4096, 0);
+
+    return 0;
 }
 
 void pagetable_free(uintptr_t pt)
@@ -29,7 +31,7 @@ void pagetable_free(uintptr_t pt)
 }
 
 /* maps addr to frame in pagetable page, null frame unmaps */
-void pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
+int8_t pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
 {
     uintptr_t pt = V2P(vpt);
     uintptr_t frame = V2P(vframe);
@@ -69,6 +71,8 @@ void pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
     /* Flush data cache and invalidate TLB entries */
     __asm volatile ("mcr p15, 0, %0, c7, c14, 0" : : "r" (0));
     __asm volatile ("mcr p15, 0, %0, c8,  c7, 0" : : "r" (0));
+
+    return 0;
 }
 
 /* Defined in src/init.s */

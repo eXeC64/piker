@@ -62,7 +62,7 @@ int8_t frame_get(uintptr_t frame)
     }
 }
 
-void frame_set(uintptr_t frame, uint8_t status)
+int8_t frame_set(uintptr_t frame, uint8_t status)
 {
     /* convert from physical address to frame index */
     uint32_t fi = frame / 0x1000;
@@ -82,6 +82,8 @@ void frame_set(uintptr_t frame, uint8_t status)
     bits |= (status << (fi % 32));
 
     frames_bitmap[fi / 32] = bits;
+
+    return 0;
 }
 
 int8_t frame_alloc(uintptr_t* frame)

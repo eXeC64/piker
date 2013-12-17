@@ -21,7 +21,7 @@
 void frame_init();
 
 int8_t frame_get(uintptr_t frame);
-void frame_set(uintptr_t frame, uint8_t status);
+int8_t frame_set(uintptr_t frame, uint8_t status);
 
 int8_t frame_alloc(uintptr_t* frame);
 void frame_free(uintptr_t frame);
