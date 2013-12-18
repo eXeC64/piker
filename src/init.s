@@ -29,7 +29,7 @@ start:
     # 1  (strict alignment fault checking)
     # 0  (mmu enabled)
 
-    ldr r6, =0x00801807
+    ldr r4, =0x00801807
     mcr p15, 0, r4, c1, c0, 0
 
     #We're now paged using virtual memory.
