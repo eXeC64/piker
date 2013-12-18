@@ -34,7 +34,7 @@ qemu: kernel.img
 	qemu-system-arm -cpu arm1176 -gdb tcp::1234 -nographic -S -m 512M -kernel ./kernel.img 
 
 gdb:
-	arm-eabi-gdb -ex "target remote :1234" -ex "layout reg"
+	$(ARMGNU)-gdb -ex "target remote :1234" -ex "layout reg"
  
 %.o: %.c
 	$(ARMGNU)-gcc $(CFLAGS) -c $< -I include -o $@
