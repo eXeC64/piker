@@ -27,8 +27,14 @@ clean:
 dist-clean: clean
 	$(RM) -f *.d
 
-run:
+run: kernel.img
 	../raspbootin/raspbootcom/raspbootcom /dev/ttyUSB0 kernel.img
+
+qemu: kernel.img
+	qemu-system-arm -cpu arm1176 -gdb tcp::1234 -nographic -S -m 512M -kernel ./kernel.img 
+
+gdb:
+	arm-eabi-gdb -ex "target remote :1234" -ex "layout reg"
  
 %.o: %.c
 	$(ARMGNU)-gcc $(CFLAGS) -c $< -I include -o $@
@@ -37,4 +43,4 @@ run:
 	$(ARMGNU)-as $< -o $@
 
 
-.PHONY: clean dist-clean run
+.PHONY: clean dist-clean run qemu gdb
