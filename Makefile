@@ -15,19 +15,22 @@ all: kernel.img
 
 include $(wildcard *.d)
 
-kernel.elf: $(OBJS) linker.ld
-	$(ARMGNU)-ld $(OBJS) $(PREFIX)/lib/gcc/arm-none-eabi/4.7.4/libgcc.a -T linker.ld -o $@
-
 kernel.img: kernel.elf
 	$(ARMGNU)-objcopy kernel.elf -O binary kernel.img
 
-clean:
-	$(RM) -f $(OBJS) kernel.elf kernel.img
- 
-dist-clean: clean
-	$(RM) -f *.d
+kernel.elf: $(OBJS) linker.ld
+	$(ARMGNU)-ld $(OBJS) $(PREFIX)/lib/gcc/arm-none-eabi/4.7.4/libgcc.a -T linker.ld -o $@
 
-run: kernel.img
+%.o: %.c
+	$(ARMGNU)-gcc $(CFLAGS) -c $< -I include -o $@
+
+%.o: %.s
+	$(ARMGNU)-as $< -o $@
+
+clean:
+	rm -f $(OBJS) kernel.elf kernel.img
+ 
+tty: kernel.img
 	../raspbootin/raspbootcom/raspbootcom /dev/ttyUSB0 kernel.img
 
 qemu: kernel.img
@@ -36,11 +39,5 @@ qemu: kernel.img
 gdb:
 	$(ARMGNU)-gdb -ex "target remote :1234" -ex "layout reg" -ex "symbol-file kernel.elf"
  
-%.o: %.c
-	$(ARMGNU)-gcc $(CFLAGS) -c $< -I include -o $@
- 
-%.o: %.s
-	$(ARMGNU)-as $< -o $@
 
-
-.PHONY: clean dist-clean run qemu gdb
+.PHONY: clean tty qemu gdb
