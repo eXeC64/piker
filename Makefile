@@ -1,7 +1,7 @@
 PREFIX ?= /opt/gcc-rpi
 ARMGNU ?= $(PREFIX)/bin/arm-none-eabi
 
-CFLAGS ?= -Wall -Werror -Wno-pointer-sign --std=c99
+CFLAGS ?= -Wall -Werror -Wno-pointer-sign --std=c99 -g
 
 # source files
 SOURCES_ASM := $(shell find src/ -type f -name '*.s')
@@ -31,10 +31,10 @@ run: kernel.img
 	../raspbootin/raspbootcom/raspbootcom /dev/ttyUSB0 kernel.img
 
 qemu: kernel.img
-	qemu-system-arm -cpu arm1176 -gdb tcp::1234 -nographic -S -m 512M -kernel ./kernel.img 
+	qemu-system-arm -cpu arm1176 -gdb tcp::1234 -nographic -S -m 512M -kernel ./kernel.img -serial stdio
 
 gdb:
-	$(ARMGNU)-gdb -ex "target remote :1234" -ex "layout reg"
+	$(ARMGNU)-gdb -ex "target remote :1234" -ex "layout reg" -ex "symbol-file kernel.elf"
  
 %.o: %.c
 	$(ARMGNU)-gcc $(CFLAGS) -c $< -I include -o $@
