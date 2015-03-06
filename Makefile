@@ -30,6 +30,10 @@ kernel.elf: $(OBJS) linker.ld
 clean:
 	rm -f $(OBJS) kernel.elf kernel.img
  
+#for uart, the pins should be connected as such:
+#.RBWG........
+#.............
+#SD card slot is on the left, usb ports on the right
 tty: kernel.img
 	../raspbootin/raspbootcom/raspbootcom /dev/ttyUSB0 kernel.img
 
