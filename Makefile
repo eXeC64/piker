@@ -1,5 +1,5 @@
-PREFIX ?= /opt/gcc-rpi
-ARMGNU ?= $(PREFIX)/bin/arm-none-eabi
+ARMGNU ?= /bin/arm-none-eabi
+ARMGNUVER ?= 4.9.3
 
 CFLAGS ?= -Wall -Werror -Wno-pointer-sign --std=c99 -g
 
@@ -19,7 +19,7 @@ kernel.img: kernel.elf
 	$(ARMGNU)-objcopy kernel.elf -O binary kernel.img
 
 kernel.elf: $(OBJS) linker.ld
-	$(ARMGNU)-ld $(OBJS) $(PREFIX)/lib/gcc/arm-none-eabi/4.7.4/libgcc.a -T linker.ld -o $@
+	$(ARMGNU)-ld $(OBJS) /usr/lib/gcc/arm-none-eabi/$(ARMGNUVER)/libgcc.a -T linker.ld -o $@
 
 %.o: %.c
 	$(ARMGNU)-gcc $(CFLAGS) -c $< -I include -o $@

@@ -81,7 +81,7 @@ extern uint32_t blank_pagetable;
 void pagetable_activate(uintptr_t pt)
 {
     /* Null pagetable means unmap it all */
-    if(pt == NULL) {
+    if(pt == 0) {
         pt = (uintptr_t)&blank_pagetable;
     }
     /* Load the page table into TTBR0 */
