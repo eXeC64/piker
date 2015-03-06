@@ -22,7 +22,7 @@ __attribute__ ((interrupt ("IRQ"))) void int_irq()
 {
     //mem_barrier();
     mem_write(ARM_TIMER_IRQ_CLEAR, 0x0);
-    //uart_puts("irq hit!\n");
+    uart_puts("irq hit!\n");
 }
 
 __attribute__ ((interrupt ("ABORT"))) void int_prefetch_abort()
