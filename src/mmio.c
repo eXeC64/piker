@@ -1,6 +1,6 @@
 #include "kernel.h"
 
-#include "mem/mmio.h"
+#include "mmio.h"
 
 void inline mem_flush_cache()
 {

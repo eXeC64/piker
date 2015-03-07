@@ -1,7 +1,7 @@
 #include "kernel.h"
 
-#include "mem/page.h"
-#include "mem/frame.h"
+#include "page.h"
+#include "frame.h"
 #include "uart.h"
 
 

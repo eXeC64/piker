@@ -1,6 +1,6 @@
 #include "kernel.h"
 
-#include "mem/frame.h"
+#include "frame.h"
 
 /* frames: 131072
  * frames / 32 : 4096

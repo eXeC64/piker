@@ -3,8 +3,8 @@
 #include "uart.h"
 #include "interrupts.h"
 #include "timer.h"
-#include "mem/frame.h"
-#include "mem/page.h"
+#include "frame.h"
+#include "page.h"
 #include "tasks.h"
 
 void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)

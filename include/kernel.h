@@ -11,7 +11,7 @@
 #include "types.h"
 
 /* Commonly used headers */
-#include "mem/mmio.h"
+#include "mmio.h"
 
 /* Global constants */
 #define TRUE 1
