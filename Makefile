@@ -1,19 +1,15 @@
-ARMGNU ?= /bin/arm-none-eabi
-ARMGNUVER ?= 4.9.3
-
-CFLAGS ?= -Wall -Werror -Wno-pointer-sign --std=c99 -g
+ARMGNU = /bin/arm-none-eabi
+ARMGNUVER = 4.9.3
 
 # source files
 SOURCES_ASM := $(shell find src/ -type f -name '*.s')
 SOURCES_C   := $(shell find src/ -type f -name '*.c')
  
 # object files
-OBJS        := $(patsubst %.s,%.o,$(SOURCES_ASM))
-OBJS        += $(patsubst %.c,%.o,$(SOURCES_C))
+OBJS := $(patsubst %.s,%.o,$(SOURCES_ASM))
+OBJS += $(patsubst %.c,%.o,$(SOURCES_C))
 
 all: kernel.img
-
-include $(wildcard *.d)
 
 kernel.img: kernel.elf
 	$(ARMGNU)-objcopy kernel.elf -O binary kernel.img
@@ -22,7 +18,7 @@ kernel.elf: $(OBJS) linker.ld
 	$(ARMGNU)-ld $(OBJS) /usr/lib/gcc/arm-none-eabi/$(ARMGNUVER)/libgcc.a -T linker.ld -o $@
 
 %.o: %.c
-	$(ARMGNU)-gcc $(CFLAGS) -c $< -I include -o $@
+	$(ARMGNU)-gcc -Wall -Werror -Wno-pointer-sign --std=c99 -c $< -I include -o $@
 
 %.o: %.s
 	$(ARMGNU)-as $< -o $@
@@ -43,5 +39,4 @@ qemu: kernel.img
 gdb:
 	$(ARMGNU)-gdb -ex "target remote :1234" -ex "layout reg" -ex "symbol-file kernel.elf"
  
-
 .PHONY: clean tty qemu gdb
