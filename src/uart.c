@@ -7,7 +7,7 @@
 void uart_init()
 {
     mem_write(UART0_CR, 0x00000000);
-    mem_write(GPPUD,0x00000000);
+    mem_write(GPPUD,    0x00000000);
     timer_sleep(1);
  
     mem_write(GPPUDCLK0, (1 << 14) | (1 << 15));
@@ -20,8 +20,8 @@ void uart_init()
  
     mem_write(UART0_LCRH, (1 << 4) | (1 << 5) | (1 << 6));
     mem_write(UART0_IMSC, (1 << 1) | (1 << 4) | (1 << 5) |
-		    (1 << 6) | (1 << 7) | (1 << 8) |
-		    (1 << 9) | (1 << 10));
+                          (1 << 6) | (1 << 7) | (1 << 8) |
+                          (1 << 9) | (1 << 10));
     mem_write(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));
 }
  
@@ -94,8 +94,8 @@ int8_t uart_getc()
 {
     while (1) {
         if (!(mem_read(UART0_FR) & (1 << 4))) {
-	    break;
-	}
+          break;
+        }
     }
     return mem_read(UART0_DR);
 }
