@@ -2,19 +2,21 @@
 
 #include "timer.h"
 
-uint64_t timer_now()
+uint32_t timer_freq = 0;
+
+void timer_init()
 {
-    mem_barrier();
+  timer_freq = timer_get_freq();
+}
 
-    uint64_t low = mem_read(SYS_TIMER_CLO);
-    uint64_t high = mem_read(SYS_TIMER_CHI);
-
-    return (high << 32) | low;
+uint64_t timer_now(void)
+{
+  return timer_get_count() / (timer_freq / 1000);
 }
 
 void timer_sleep(uint64_t duration_ms)
 {
-    uint64_t end = timer_now(NULL) + duration_ms * 1000;
-    while(timer_now() < end) { ; }
+  uint64_t end = timer_now() + duration_ms;
+  while(timer_now() < end) { ; }
 }
 
