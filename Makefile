@@ -34,6 +34,9 @@ tty: kernel.img
 	../raspbootin/raspbootcom/raspbootcom /dev/ttyUSB0 kernel.img
 
 run: clean kernel.img
+	qemu-system-arm -cpu arm1176 -M raspi2 -gdb tcp::1234 -m 256 -kernel kernel.img -serial stdio
+
+debug: clean kernel.img
 	qemu-system-arm -S -cpu arm1176 -M raspi2 -gdb tcp::1234 -m 256 -kernel kernel.img -serial stdio
 
 gdb:
