@@ -1,5 +1,5 @@
 ARMGNU = /bin/arm-none-eabi
-ARMGNUVER = 4.9.3
+ARMGNUVER = 7.2.0
 
 # source files
 SOURCES_ASM := $(shell find src/ -type f -name '*.s')
@@ -33,10 +33,10 @@ clean:
 tty: kernel.img
 	../raspbootin/raspbootcom/raspbootcom /dev/ttyUSB0 kernel.img
 
-qemu: kernel.img
-	qemu-system-arm -cpu arm1176 -gdb tcp::1234 -nographic -S -m 512M -kernel ./kernel.img -serial stdio
+run: clean kernel.img
+	qemu-system-arm -S -cpu arm1176 -M raspi2 -gdb tcp::1234 -m 256 -kernel kernel.img -serial stdio
 
 gdb:
-	$(ARMGNU)-gdb -ex "target remote :1234" -ex "layout reg" -ex "symbol-file kernel.elf"
+	$(ARMGNU)-gdb -q -ex "target remote :1234" -ex "layout reg" -ex "symbol-file kernel.elf" -ex 'set $$pc=0x10000'
  
 .PHONY: clean tty qemu gdb

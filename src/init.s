@@ -3,11 +3,15 @@
 .global start
 start:
 
-    #Load identity in lower memory, and kernel in higher
-    ldr r4, =identity_pagetable - 0xC0000000
+    // Load identity in lower memory, and kernel in higher
+    mov r5, pc       // This is the first instruction - start of our binary in memory
+    bic r5, #0xFF    // Clear out the lowest 2 bytes
+    mov r4, r5       // Save the base address
+    add r4, #0x1000  // Pagetable for initial boot is 0x1000 from start of binary
     mcr p15, 0, r4, c2, c0, 0
 
-    ldr r4, =kernel_pagetable - 0xC0000000
+    mov r4, r5
+    add r4, #0x4000  // Pagetable for kernel in higher memory is 0x4000 from start of binary
     mcr p15, 0, r4, c2, c0, 1
 
     #Set the boundary to 2, 1GB is paged by TTBR0, the rest by TTBR1
@@ -37,10 +41,11 @@ start:
     ldr pc, =high_addr
 
 high_addr:
-    #Now we're in higher memory, lets unmap lower memory
+    // Now we're in higher memory, lets unmap lower memory
 
-    #Load the blank table into TTBR0
-    ldr r4, =blank_pagetable - 0xC0000000
+    // Load the blank table into TTBR0
+    mov r4, r5
+    add r4, #0x2000 // Blank page table is 0x2000 from start of binary
     mcr p15, 0, r4, c2, c0, 0
 
     #Flush the cache of old translations
@@ -147,20 +152,11 @@ user_stack:
 user_stack_top:
 
 
-.section ".data.pagetable"
-
-#This is the default user pagetable, used to clear the mapping
-.balign 4096
-.global blank_pagetable
-
-blank_pagetable:
+.section ".text.pt_blank"
     #All 1GB unmapped (0x00000000-0x3FFFFFFF)
     .fill 4*1024, 1, 0
 
-.balign 4096
-.global identity_pagetable
-
-identity_pagetable:
+.section ".text.pt_boot"
     #Identity map first 256MB of memory (0x00000000-0x0FFFFFFF)
     # write-back, allocate on write
     .fill 16, 4, 0x0004140E
@@ -202,10 +198,7 @@ identity_pagetable:
     #Final 512MB is unmapped
     .fill 4*512, 1, 0
 
-.balign 16384
-.global kernel_pagetable
-
-kernel_pagetable:
+.section ".text.pt_kernel"
     #Unmapped (0x00000000-0xBFFFFFFF)
     .fill 4*3072, 1, 0
 
@@ -254,7 +247,7 @@ kernel_pagetable:
     #Using same layout as linux, as given by
     #BCM2825-ARM-Peripherals manual
     #Memory = device
-    .fill	16, 4, 0x20040406
+    .fill   16, 4, 0x3F040406
 
     #Unmapped (0xF3000000-0xFFFFFFFF)
-    .fill   4*208, 1, 0
+    .fill   4*268, 1, 0
