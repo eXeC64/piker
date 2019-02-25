@@ -1,5 +1,5 @@
 ARMGNU = /bin/arm-none-eabi
-ARMGNUVER = 7.2.0
+ARMGNUVER = 8.2.0
 
 # source files
 SOURCES_ASM := $(shell find src/ -type f -name '*.s')
