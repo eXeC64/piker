@@ -33,8 +33,13 @@ void pagetable_free(uintptr_t pt)
 /* maps addr to frame in pagetable page, null frame unmaps */
 int8_t pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
 {
+  return pagetable_map_page_phy(vpt, vaddr, V2P(vframe));
+}
+
+int8_t pagetable_map_page_phy(uintptr_t vpt, uintptr_t vaddr, uintptr_t pframe)
+{
     uintptr_t pt = V2P(vpt);
-    uintptr_t frame = V2P(vframe);
+    uintptr_t frame = pframe;
 
     uintptr_t flp = 0xFFFFF000 & pt;
 
@@ -60,7 +65,7 @@ int8_t pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
 
     uint32_t sld;
 
-    if(vframe == 0) {
+    if(pframe == 0) {
         sld = 0;
     } else {
         sld = frame | 0x72;

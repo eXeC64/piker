@@ -72,7 +72,7 @@ int8_t frame_set(uintptr_t frame, uint8_t status)
         return -EINVAL;
     }
 
-    if(status > 1) {
+    if(status) {
         status = 1;
     }
 
