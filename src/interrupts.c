@@ -3,6 +3,8 @@
 #include "interrupts.h"
 #include "syscalls.h"
 #include "uart.h"
+#include "qa7_control.h"
+#include "tasks.h"
 
 __attribute__ ((naked)) void halt()
 {
@@ -20,9 +22,12 @@ __attribute__ ((interrupt ("SWI"))) void int_swi(int32_t r0, int32_t r1, int32_t
 
 __attribute__ ((interrupt ("IRQ"))) void int_irq()
 {
-    //mem_barrier();
-    mem_write(ARM_TIMER_IRQ_CLEAR, 0x0);
-    uart_puts("irq hit!\n");
+    struct qa7_control *cnt = (struct qa7_control*)0x8000;
+    cnt->local_timer_flags = (1 << 31);
+    mem_barrier();
+
+    uart_puts("calling tasks_tick!\n");
+    tasks_tick();
 }
 
 __attribute__ ((interrupt ("ABORT"))) void int_prefetch_abort()
@@ -65,6 +70,6 @@ void interrupts_init()
     /* Make sure the IRQ and FIQ disable bits are not set */
     uint32_t cpsr;
     __asm volatile("mrs %0, cpsr" : "=r" (cpsr));
-    cpsr &= 0xFFFFFF3F;
+    cpsr &= ~((1<<7) | (1<<6));
     __asm volatile("msr cpsr, %0" : : "r" (cpsr));
 }

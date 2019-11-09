@@ -6,62 +6,46 @@
 #include "frame.h"
 #include "page.h"
 #include "tasks.h"
+#include "qa7_control.h"
 
 void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 {
-    (void)r0;
-    (void)r1;
-    (void)atags;
-    timer_init();
-    uart_init();
-    frame_init();
-    interrupts_init();
-    tasks_init();
+  (void)r0;
+  (void)r1;
+  (void)atags;
+  timer_init();
+  uart_init();
+  uart_printf("uart on\n");
+  frame_init();
+  interrupts_init();
+  uart_printf("interrupts on\n");
+  tasks_init();
+  uart_printf("tasks on\n");
 
-    uint32_t r;
-    __asm volatile("mrc p15, 0, %0, c1, c1, 0" : "=g" (r));
-    uart_printf("scr: 0x%x = 0b%b\n", r, r);
 
-    uintptr_t pt = 0;
-    pagetable_init(&pt);
+  uintptr_t pt = 0;
+  pagetable_init(&pt);
 
-    uintptr_t frame;
-    frame_alloc(&frame);
+  struct qa7_control *cnt = (struct qa7_control*)0x8000;
+  pagetable_map_page_phy(pt, (uintptr_t)cnt, QA7_BASE_ADDR);
 
-    pagetable_map_page(pt, 0x7000, frame);
+  pagetable_activate(pt);
+  uart_printf("pagetable on\n");
 
-    pagetable_activate(pt);
+  const uint32_t INT_ENABLE = 1 << 29;
+  const uint32_t TIMER_ENABLE = 1 << 28;
 
-    __asm volatile(
-            "ldr r0, =0xdead;"
-            "ldr r1, =0xbeef;"
-            "ldr r2, =0xabad1dea;"
-            "ldr r3, =0x1234;"
-            "svc %0;"
-            : :
-            "g" (0x80)
-            : "r0", "r1", "r2", "r3"
-            );
+  cnt->local_intr_routing = 0;
+  cnt->local_timer_flags = (1<<31) | (1<<30);
+  cnt->local_timer_control = INT_ENABLE | TIMER_ENABLE | (10 * 1000 * 1000);
 
-    size_t i = 0;
-    while(TRUE) {
-        uart_printf("time: %ims\n", (uint32_t)(timer_now()));
-        uart_printf("i: %i\n", i++);
+  uart_printf("main loop on\n");
+  while(TRUE) {
 
-        mem_write(frame, 0xDEADBEEF);
+    uart_printf("time: %ims\n", (uint32_t)timer_now());
 
-        /*
-        uart_printf("written\n");
+    timer_sleep(1000);
+  }
 
-        uart_printf("val: 0x%x\n", mem_read(0x7000));
-
-        uart_printf("RAW: 0x%x\n", mem_read(ARM_TIMER_IRQ_RAW));
-        uart_printf("MASK: 0x%x\n", mem_read(ARM_TIMER_IRQ_MASK));
-        uart_printf("PEND: 0x%x\n", mem_read(ARM_IRQ_PENDING_BASIC));
-        */
-
-        timer_sleep(100);
-    }
-
-    uart_puts("\n*** HALTING ***\n");
+  uart_puts("\n*** HALTING ***\n");
 }
