@@ -18,7 +18,7 @@
  *  There are 131072 frames, (512MiB/4KiB)
  */
 
-void frame_init();
+void frame_init(void);
 
 int8_t frame_get(uintptr_t frame);
 int8_t frame_set(uintptr_t frame, uint8_t status);

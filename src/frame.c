@@ -10,7 +10,7 @@
 
 uint32_t frames_bitmap[4096] __attribute__((aligned (4096)));
 
-void frame_init()
+void frame_init(void)
 {
     /* All frames are free to begin with */
     for(uint32_t i = 0; i < 4096; ++i) {

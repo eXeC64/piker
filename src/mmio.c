@@ -2,7 +2,7 @@
 
 #include "mmio.h"
 
-void inline mem_flush_cache()
+void inline mem_flush_cache(void)
 {
     __asm__(
             "mov r3, #0;"
@@ -17,7 +17,7 @@ void inline mem_flush_cache()
            );
 }
 
-void inline mem_barrier()
+void inline mem_barrier(void)
 {
     __asm__(
             "mov r3, #0;"

@@ -7,8 +7,8 @@
 #define V2P(x) ((x - 0xC0000000))
 #define P2V(x) ((x + 0xC0000000))
 
-void mem_flush_cache();
-void mem_barrier();
+void mem_flush_cache(void);
+void mem_barrier(void);
 
 void mem_write(uintptr_t address, uint32_t val);
 uint32_t mem_read(uintptr_t address);
