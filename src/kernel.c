@@ -23,7 +23,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
   uart_printf("tasks on\n");
 
 
-  uintptr_t pt = 0;
+  struct pagetable *pt = 0;
   pagetable_init(&pt);
 
   struct qa7_control *cnt = (struct qa7_control*)0x8000;
@@ -32,14 +32,16 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
   pagetable_activate(pt);
   uart_printf("pagetable on\n");
 
-  const uint32_t INT_ENABLE = 1 << 29;
-  const uint32_t TIMER_ENABLE = 1 << 28;
 
   cnt->local_intr_routing = 0;
   cnt->local_timer_flags = (1<<31) | (1<<30);
+  const uint32_t INT_ENABLE = 1 << 29;
+  const uint32_t TIMER_ENABLE = 1 << 28;
   cnt->local_timer_control = INT_ENABLE | TIMER_ENABLE | (10 * 1000 * 1000);
 
   uart_printf("main loop on\n");
+  uart_printf("char=%i\nshort=%i\nint=%i\nlong=%i\nptr=%i\n",
+      sizeof(char), sizeof(short), sizeof(int), sizeof(long), sizeof(void*));
   while(TRUE) {
 
     uart_printf("time: %ims\n", (uint32_t)timer_now());

@@ -5,25 +5,25 @@
 #include "uart.h"
 
 
-int8_t pagetable_init(uintptr_t* pt)
+int pagetable_init(struct pagetable **pt)
 {
-    if(frame_alloc(pt) != 0) {
+    if (frame_alloc((void**)pt) != 0) {
         return -ENOMEM;
     }
 
-    mem_set(*pt, 4096, 0);
+    mem_set((uintptr_t)*pt, 4096, 0);
 
     return 0;
 }
 
-void pagetable_free(uintptr_t pt)
+void pagetable_free(struct pagetable *pt)
 {
     uintptr_t flda;
-    for(flda = pt; flda < pt + 0x1000; flda += 4) {
+    for (flda = (uintptr_t)pt; flda < (uintptr_t)pt + 0x1000; flda += 4) {
         uint32_t fld = mem_read(flda);
         if((fld & 0x3) == 0x1) {
             uintptr_t slp = fld & 0xFFFFFC00;
-            frame_free(P2V(slp));
+            frame_free((void*)P2V(slp));
         }
     }
 
@@ -31,27 +31,26 @@ void pagetable_free(uintptr_t pt)
 }
 
 /* maps addr to frame in pagetable page, null frame unmaps */
-int8_t pagetable_map_page(uintptr_t vpt, uintptr_t vaddr, uintptr_t vframe)
+int pagetable_map_page(struct pagetable *pt, void *virt, void *frame)
 {
-  return pagetable_map_page_phy(vpt, vaddr, V2P(vframe));
+  return pagetable_map_page_phy(pt, virt, V2P(frame));
 }
 
-int8_t pagetable_map_page_phy(uintptr_t vpt, uintptr_t vaddr, uintptr_t pframe)
+int pagetable_map_page_phy(struct pagetable *pt, void *virt, void *phy)
 {
-    uintptr_t pt = V2P(vpt);
-    uintptr_t frame = pframe;
+    uintptr_t frame = (uintptr_t)phy;
 
-    uintptr_t flp = 0xFFFFF000 & pt;
+    uintptr_t flp = 0xFFFFF000 & V2P((uintptr_t)pt);
 
-    uintptr_t flda = flp | ((vaddr >> 18) & 0xFFC);
+    uintptr_t flda = flp | (((uint32_t)virt >> 18) & 0xFFC);
 
     uint32_t fld = mem_read(P2V(flda));
 
     uintptr_t vslp;
     uintptr_t slp;
 
-    if((fld & 0x3) != 0x1) {
-        if(frame_alloc(&vslp) != 0) { return -ENOMEM; }
+    if ((fld & 0x3) != 0x1) {
+        if (frame_alloc((void**)&vslp) != 0) { return -ENOMEM; }
         slp = V2P(vslp);
         mem_set(vslp, 4096, 0);
 
@@ -61,11 +60,11 @@ int8_t pagetable_map_page_phy(uintptr_t vpt, uintptr_t vaddr, uintptr_t pframe)
         slp = 0xFFFFFC00 & fld;
     }
 
-    uintptr_t slda = slp | ((vaddr >> 10) & 0xFF);
+    uintptr_t slda = slp | (((uintptr_t)virt >> 10) & 0xFF);
 
     uint32_t sld;
 
-    if(pframe == 0) {
+    if (frame == 0) {
         sld = 0;
     } else {
         sld = frame | 0x72;
@@ -81,16 +80,16 @@ int8_t pagetable_map_page_phy(uintptr_t vpt, uintptr_t vaddr, uintptr_t pframe)
 }
 
 /* Defined in src/init.s */
-extern uint32_t blank_pagetable;
+extern struct pagetable *blank_pagetable;
 
-void pagetable_activate(uintptr_t pt)
+void pagetable_activate(struct pagetable *pt)
 {
     /* Null pagetable means unmap it all */
-    if(pt == 0) {
-        pt = (uintptr_t)&blank_pagetable;
+    if (pt == 0) {
+        pt = blank_pagetable;
     }
     /* Load the page table into TTBR0 */
-    __asm volatile ("mcr p15, 0, %0, c2, c0, 0" : : "r" (V2P(pt)));
+    __asm volatile ("mcr p15, 0, %0, c2, c0, 0" : : "r" (V2P((uint32_t)pt)));
 
     /* Invalidate the TLB entries */
     __asm volatile ("mcr p15, 0, %0, c8, c7, 0" : : "r" (0));
