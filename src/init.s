@@ -111,7 +111,7 @@ high_addr:
 
 halt:
     wfe
-    b halt
+    hlt
 
 .section ".bss"
 

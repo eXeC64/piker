@@ -8,7 +8,7 @@
 
 __attribute__ ((naked)) void halt()
 {
-    while(1);
+    __asm volatile("hlt;");
 }
 
 __attribute__ ((interrupt ("SWI"))) void int_swi(int32_t r0, int32_t r1, int32_t r2, int32_t r3)
@@ -75,7 +75,6 @@ void interrupts_init()
 
 
     /* Setup a timer interrupt to drive the scheduler */
-
     struct qa7_control *cnt = (struct qa7_control*)(QA7_BASE_ADDR);
     cnt->local_intr_routing = 0;
     cnt->local_timer_flags = (1<<31) | (1<<30);
