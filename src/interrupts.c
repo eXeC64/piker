@@ -22,7 +22,7 @@ __attribute__ ((interrupt ("SWI"))) void int_swi(int32_t r0, int32_t r1, int32_t
 
 __attribute__ ((interrupt ("IRQ"))) void int_irq()
 {
-    struct qa7_control *cnt = (struct qa7_control*)0x8000;
+    struct qa7_control *cnt = (struct qa7_control*)(QA7_BASE_ADDR);
     cnt->local_timer_flags = (1 << 31);
     mem_barrier();
 

@@ -26,8 +26,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
   struct pagetable *pt = 0;
   pagetable_init(&pt);
 
-  struct qa7_control *cnt = (struct qa7_control*)0x8000;
-  pagetable_map_page_phy(pt, (uintptr_t)cnt, QA7_BASE_ADDR);
+  struct qa7_control *cnt = (struct qa7_control*)(QA7_BASE_ADDR);
 
   pagetable_activate(pt);
   uart_printf("pagetable on\n");

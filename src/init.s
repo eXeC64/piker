@@ -199,8 +199,13 @@ user_stack_top:
     .fill 4*512, 1, 0
 
 .section ".text.pt_kernel"
-    #Unmapped (0x00000000-0xBFFFFFFF)
-    .fill 4*3072, 1, 0
+    #First 1GB unmapped (0x00000000-0x3FFFFFFF)
+    .fill 4*1024, 1, 0
+
+    #Linear map 1MB over QA7 timer area (0x40000000-0x40FFFFFF)
+    .fill 16, 4, 0x40040406
+    #Unmapped (0x40FFFFFF-0xBFFFFFFF)
+    .fill 4*2032, 1, 0
 
     #Linear map first 256MB of memory (0xC0000000-0xCFFFFFFF)
     # write-back, allocate on write
