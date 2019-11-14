@@ -72,4 +72,14 @@ void interrupts_init()
     __asm volatile("mrs %0, cpsr" : "=r" (cpsr));
     cpsr &= ~((1<<7) | (1<<6));
     __asm volatile("msr cpsr, %0" : : "r" (cpsr));
+
+
+    /* Setup a timer interrupt to drive the scheduler */
+
+    struct qa7_control *cnt = (struct qa7_control*)(QA7_BASE_ADDR);
+    cnt->local_intr_routing = 0;
+    cnt->local_timer_flags = (1<<31) | (1<<30);
+    const uint32_t INT_ENABLE = 1 << 29;
+    const uint32_t TIMER_ENABLE = 1 << 28;
+    cnt->local_timer_control = INT_ENABLE | TIMER_ENABLE | (10 * 1000 * 1000);
 }
